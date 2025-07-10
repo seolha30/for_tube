@@ -1,95 +1,377 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>튜브렌즈 월간 구독</title>
     <script src="https://lite.payapp.kr/public/api/v2/payapp-lite.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .subscription-info {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+        
+        .subscription-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .subscription-info p {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .subscription-info .price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 15px 0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .features {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 8px;
+        }
+        
+        .features h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features li {
+            color: #555;
+            margin-bottom: 5px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>💎 튜브렌즈 월간 구독</h1>
+            <p>매월 자동 결제로 편리하게 이용하세요</p>
+        </div>
+        
+        <div class="message" id="message"></div>
+        
+        <div id="subscriptionForm">
+            <div class="form-group">
+                <label for="phone">휴대폰 번호</label>
+                <input type="tel" id="phone" placeholder="010-0000-0000" maxlength="13">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">이메일 주소</label>
+                <input type="email" id="email" placeholder="example@gmail.com">
+                <small style="color: #666; font-size: 14px;">인증키 발송용 - 정확히 입력해주세요!</small>
+            </div>
+            
+            <button class="btn" onclick="showSubscriptionInfo()">구독 정보 확인</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>결제창을 준비하고 있습니다...</p>
+        </div>
+        
+        <div class="subscription-info" id="subscriptionInfo">
+            <h3>📋 구독 정보</h3>
+            <p><strong>상품명:</strong> 튜브렌즈 월간 구독</p>
+            <p class="price">월 1,000원</p>
+            <p><strong>결제수단:</strong> 신용카드 또는 휴대폰 결제</p>
+            <p><strong>결제일:</strong> 매월 오늘 날짜</p>
+            <p><strong>만료일:</strong> 2035년 12월 31일</p>
+            
+            <div class="features">
+                <h4>🎯 구독 혜택</h4>
+                <ul>
+                    <li>매월 자동 결제로 편리함</li>
+                    <li>언제든 해지 가능</li>
+                    <li>결제 실패시 자동 재시도</li>
+                    <li>이메일로 인증키 발송</li>
+                </ul>
+            </div>
+            
+            <button class="btn" onclick="startPayment()" style="margin-top: 20px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                💳 결제하기
+            </button>
+            
+            <button class="btn" onclick="resetForm()" style="background: #6c757d;">
+                ← 다시 입력하기
+            </button>
+        </div>
+    </div>
+
     <script>
-        // PayApp 라이브러리 로드를 기다린 후 실행
-        window.addEventListener('load', function() {
-            // 잠시 대기 후 실행 (라이브러리 완전 로드 대기)
-            setTimeout(function() {
-                startPayment();
-            }, 500);
+        // 전화번호 자동 포맷팅
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            if (value.length <= 11) {
+                if (value.length > 6) {
+                    value = value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+                } else if (value.length > 3) {
+                    value = value.replace(/(\d{3})(\d{4})/, '$1-$2');
+                }
+            }
+            e.target.value = value;
         });
         
+        // 구독 정보 확인
+        function showSubscriptionInfo() {
+            const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
+            const email = document.getElementById('email').value.trim();
+            
+            // 입력 검증
+            if (!phoneInput || phoneInput.length !== 11 || !phoneInput.startsWith('010')) {
+                showMessage('올바른 휴대폰 번호를 입력해주세요.', 'error');
+                return;
+            }
+            
+            if (!email || !email.includes('@')) {
+                showMessage('올바른 이메일 주소를 입력해주세요.', 'error');
+                return;
+            }
+            
+            // 구독 정보 표시
+            document.getElementById('subscriptionForm').style.display = 'none';
+            document.getElementById('subscriptionInfo').style.display = 'block';
+            hideMessage();
+        }
+        
+        // 결제 시작
         function startPayment() {
-            // PayApp 객체 확인
-            if (typeof PayApp === 'undefined') {
-                alert('결제 시스템을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
-                history.back();
+            const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
+            const email = document.getElementById('email').value.trim();
+            
+            // 최종 확인
+            if (!confirm(`다음 정보로 구독을 시작하시겠습니까?\n\n휴대폰: ${phoneInput}\n이메일: ${email}\n금액: 월 1,000원`)) {
                 return;
             }
             
-            // 1단계: 휴대폰 번호 입력
-            const phone = prompt('1단계: 휴대폰 번호를 입력하세요\n(예: 01012345678)');
-            if (!phone) {
-                history.back();
-                return;
-            }
+            // 로딩 표시
+            document.getElementById('subscriptionInfo').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
             
-            // 휴대폰 번호 검증
-            const cleanPhone = phone.replace(/[^0-9]/g, '');
-            if (cleanPhone.length !== 11 || !cleanPhone.startsWith('010')) {
-                alert('올바른 휴대폰 번호를 입력해주세요.');
-                history.back();
-                return;
-            }
-            
-            // 2단계: 이메일 주소 입력
-            const email = prompt('2단계: 이메일 주소를 입력하세요\n(인증키 발송용 - 정확히 입력해주세요!)');
-            if (!email) {
-                alert('이메일을 입력하지 않으면 인증키를 받을 수 없습니다.');
-                history.back();
-                return;
-            }
-            
-            // 이메일 형식 검증
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert('올바른 이메일 형식을 입력해주세요.\n예: example@gmail.com');
-                history.back();
-                return;
-            }
-            
-            // 3단계: 확인 메시지
-            const confirmMessage = `입력하신 정보를 확인해주세요:
-            
-휴대폰: ${cleanPhone}
-이메일: ${email}
-
-인증키가 위 이메일로 발송됩니다.
-결제수단: 신용카드 또는 휴대폰 결제 선택 가능
-결제를 진행하시겠습니까?`;
-            
-            if (!confirm(confirmMessage)) {
-                history.back();
-                return;
-            }
-            
+            // 잠시 대기 후 PayApp 호출
+            setTimeout(function() {
+                callPayApp(phoneInput, email);
+            }, 1000);
+        }
+        
+        // PayApp 호출
+        function callPayApp(phone, email) {
             try {
-                // PayApp 정기결제 호출
-                PayApp.setParam({
-                    'userid': 'tubelens',
-                    'goodname': '튜브렌즈 월간 구독',
-                    'goodprice': '1000',
-                    'recvphone': cleanPhone,
-                    'feedbackurl': 'https://script.google.com/macros/s/AKfycbyygypGt_nPzzFyvVpbPzJ76a5Zy-GvmMNcj-7Jo87zZjvbuoy6qA9_gsQE-hLi9HtR/exec',
-                    'rebillCycleType': 'Month',
-                    'rebillCycleMonth': new Date().getDate().toString(),
-                    'rebillExpire': '2035-12-31',
-                    'openpaytype': 'card,phone',  // 카드와 휴대폰 결제 둘 다 지원
-                    'smsuse': 'n',
-                    'memo': `인증키 발송 이메일: ${email}` 
-                });
+                // PayApp 객체 확인
+                if (typeof PayApp === 'undefined') {
+                    showMessage('결제 시스템을 불러오는 중입니다. 잠시 후 다시 시도해주세요.', 'error');
+                    resetForm();
+                    return;
+                }
                 
+                // PayApp 파라미터 설정
+                PayApp.setParam('userid', 'tubelens');
+                PayApp.setParam('goodname', '튜브렌즈 월간 구독');
+                PayApp.setParam('goodprice', '1000');
+                PayApp.setParam('recvphone', phone);
+                PayApp.setParam('feedbackurl', 'https://script.google.com/macros/s/AKfycbyygypGt_nPzzFyvVpbPzJ76a5Zy-GvmMNcj-7Jo87zZjvbuoy6qA9_gsQE-hLi9HtR/exec');
+                PayApp.setParam('rebillCycleType', 'Month');
+                PayApp.setParam('rebillCycleMonth', new Date().getDate().toString());
+                PayApp.setParam('rebillExpire', '2035-12-31');
+                PayApp.setParam('openpaytype', 'card,phone');
+                PayApp.setParam('smsuse', 'n');
+                PayApp.setParam('memo', `인증키 발송 이메일: ${email}`);
+                
+                console.log('PayApp 정기결제 호출: phone=' + phone + ', email=' + email);
+                
+                // 정기결제 호출
                 PayApp.rebill();
+                
             } catch (error) {
                 console.error('PayApp 오류:', error);
-                alert('결제 시스템 오류가 발생했습니다. 다시 시도해주세요.');
-                history.back();
+                showMessage('결제 시스템 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+                resetForm();
             }
         }
+        
+        // 메시지 표시
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+        }
+        
+        // 메시지 숨기기
+        function hideMessage() {
+            document.getElementById('message').style.display = 'none';
+        }
+        
+        // 폼 리셋
+        function resetForm() {
+            document.getElementById('subscriptionForm').style.display = 'block';
+            document.getElementById('subscriptionInfo').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+            hideMessage();
+        }
+        
+        // 엔터키 지원
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.getElementById('subscriptionForm').style.display !== 'none') {
+                showSubscriptionInfo();
+            }
+        });
     </script>
 </body>
 </html>
