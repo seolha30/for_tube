@@ -520,7 +520,7 @@
     <script>
         // PayApp 콜백 함수들 정의
         function payapp_complete(data) {
-            console.log('결제 완료:', data);
+            console.log('🎉 결제 완료 콜백 호출:', data);
             // 로딩 화면 숨기기
             document.getElementById('loading').style.display = 'none';
             // 결제 완료 화면 표시
@@ -528,15 +528,22 @@
         }
         
         function payapp_fail(data) {
-            console.log('결제 실패:', data);
+            console.log('❌ 결제 실패 콜백 호출:', data);
             showMessage('결제가 취소되었습니다.', 'error');
             resetForm();
         }
         
         function payapp_close() {
-            console.log('PayApp 창 닫힘');
+            console.log('🚪 PayApp 창 닫힘 콜백 호출');
             // 창이 닫혔을 때 로딩 화면 숨기기
             document.getElementById('loading').style.display = 'none';
+            // 5초 후에도 결제완료 화면이 안보이면 폼으로 돌아가기
+            setTimeout(function() {
+                if (document.getElementById('paymentComplete').style.display !== 'block') {
+                    console.log('⚠️ 결제 상태 불명 - 폼으로 복귀');
+                    resetForm();
+                }
+            }, 5000);
         }
         
         // 전화번호 자동 포맷팅
@@ -608,23 +615,32 @@
         // PayApp 호출
         function callPayApp(phone, email) {
             try {
+                console.log('🚀 PayApp 호출 시작');
+                console.log('전화번호:', phone, '이메일:', email);
+                
                 // PayApp 객체 확인
                 if (typeof PayApp === 'undefined') {
+                    console.error('❌ PayApp 객체가 정의되지 않음');
                     showMessage('결제 시스템을 불러오는 중입니다. 잠시 후 다시 시도해주세요.', 'error');
                     resetForm();
                     return;
                 }
                 
+                console.log('✅ PayApp 객체 확인됨');
+                
                 // PayApp 콜백 함수 설정
                 PayApp.setCallback('complete', payapp_complete);
                 PayApp.setCallback('fail', payapp_fail);
                 PayApp.setCallback('close', payapp_close);
+                console.log('✅ 콜백 함수 설정 완료');
                 
-                // PayApp 파라미터 설정
+                // PayApp 파라미터 설정 (정기결제용)
                 PayApp.setParam('userid', 'tubelens');
+                PayApp.setParam('shopname', '튜브렌즈'); // 상점명 추가
                 PayApp.setParam('goodname', '튜브렌즈 월간 구독');
                 PayApp.setParam('goodprice', '1000');
                 PayApp.setParam('recvphone', phone);
+                PayApp.setParam('recvemail', email); // 이메일 파라미터 추가
                 PayApp.setParam('feedbackurl', 'https://script.google.com/macros/s/AKfycbzwKlmegDOYhIYZFhJ7ko_Z5Fr8P4KqR7cCox_8IF7npyum5qb2yTWR4j0X381ZrGxX/exec');
                 PayApp.setParam('rebillCycleType', 'Month');
                 PayApp.setParam('rebillCycleMonth', new Date().getDate().toString());
@@ -633,17 +649,22 @@
                 PayApp.setParam('smsuse', 'n');
                 PayApp.setParam('memo', `인증키 발송 이메일: ${email}`);
                 
+                console.log('✅ PayApp 파라미터 설정 완료');
+                console.log('결제일:', new Date().getDate().toString());
+                
                 // 자동 닫기 관련 파라미터 (PayApp 버전에 따라 다를 수 있음)
                 PayApp.setParam('autoclose', 'Y'); // 자동 닫기 활성화
                 PayApp.setParam('closetype', 'auto'); // 자동 닫기 타입
                 
-                console.log('PayApp 정기결제 호출: phone=' + phone + ', email=' + email);
+                console.log('🎯 PayApp.rebill() 호출 시작...');
                 
                 // 정기결제 호출
                 PayApp.rebill();
                 
+                console.log('✅ PayApp.rebill() 호출 완료');
+                
             } catch (error) {
-                console.error('PayApp 오류:', error);
+                console.error('❌ PayApp 오류:', error);
                 showMessage('결제 시스템 오류가 발생했습니다. 다시 시도해주세요.', 'error');
                 resetForm();
             }
