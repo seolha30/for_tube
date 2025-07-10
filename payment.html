@@ -628,12 +628,6 @@
                 
                 console.log('✅ PayApp 객체 확인됨');
                 
-                // PayApp 콜백 함수 설정
-                PayApp.setCallback('complete', payapp_complete);
-                PayApp.setCallback('fail', payapp_fail);
-                PayApp.setCallback('close', payapp_close);
-                console.log('✅ 콜백 함수 설정 완료');
-                
                 // PayApp 파라미터 설정 (정기결제용)
                 PayApp.setParam('userid', 'tubelens');
                 PayApp.setParam('shopname', '튜브렌즈'); // 상점명 추가
@@ -658,7 +652,7 @@
                 
                 console.log('🎯 PayApp.rebill() 호출 시작...');
                 
-                // 정기결제 호출
+                // 정기결제 호출 (콜백은 글로벌 함수로 자동 연결됨)
                 PayApp.rebill();
                 
                 console.log('✅ PayApp.rebill() 호출 완료');
