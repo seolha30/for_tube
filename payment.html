@@ -27,29 +27,63 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             padding: 40px;
-            max-width: 800px;
+            max-width: 600px;
             width: 100%;
         }
         
         @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
+            .subscription-info {
+                margin-top: 20px;
+                background: #f8f9fa;
                 border-radius: 10px;
-                max-width: none;
-                width: calc(100% - 20px);
+                padding: 15px;
+                border-left: 4px solid #667eea;
+                margin-left: -20px;
+                margin-right: -20px;
+                border-radius: 0;
             }
             
-            body {
-                padding: 10px;
+            .user-info-confirm {
+                background: #e3f2fd;
+                border: 1px solid #2196f3;
+                border-radius: 0;
+                padding: 15px;
+                margin-bottom: 20px;
+                margin-left: -15px;
+                margin-right: -15px;
             }
             
-            .header h1 {
-                font-size: 24px;
+            .features {
+                margin-top: 20px;
+                padding: 15px;
+                background: #e8f4f8;
+                border-radius: 0;
+                margin-left: -15px;
+                margin-right: -15px;
             }
             
-            .header p {
+            .auth-key-info {
+                margin-top: 20px;
+                padding: 15px;
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                border-radius: 0;
                 font-size: 14px;
+                line-height: 1.5;
+                margin-left: -15px;
+                margin-right: -15px;
+            }
+            
+            .terms-agreement {
+                margin-top: 20px;
+                padding: 15px;
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 0;
+                font-size: 14px;
+                line-height: 1.5;
+                margin-left: -15px;
+                margin-right: -15px;
             }
         }
         
@@ -257,31 +291,6 @@
             font-weight: bold;
         }
         
-        .additional-info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        
-        .additional-info h4 {
-            color: #856404;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        
-        .additional-info p {
-            color: #856404;
-            margin-bottom: 8px;
-        }
-        
-        .additional-info strong {
-            color: #d73527;
-        }
-        
         .auth-key-info {
             margin-top: 20px;
             padding: 15px;
@@ -375,6 +384,29 @@
         .checkbox-label input[type="checkbox"]:checked + .checkmark {
             color: #28a745;
         }
+        
+        .payment-complete {
+            text-align: center;
+            padding: 40px 20px;
+            display: none;
+        }
+        
+        .payment-complete h2 {
+            color: #28a745;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .payment-complete p {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .payment-complete .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -406,6 +438,14 @@
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p>결제창을 준비하고 있습니다...</p>
+        </div>
+        
+        <div class="payment-complete" id="paymentComplete">
+            <div class="success-icon">✅</div>
+            <h2>결제가 완료되었습니다!</h2>
+            <p>인증키가 이메일로 발송됩니다.</p>
+            <p>이메일을 확인해주세요.</p>
+            <button class="btn" onclick="location.reload()">새로운 구독하기</button>
         </div>
         
         <div class="subscription-info" id="subscriptionInfo">
@@ -478,6 +518,27 @@
     </div>
 
     <script>
+        // PayApp 콜백 함수들 정의
+        function payapp_complete(data) {
+            console.log('결제 완료:', data);
+            // 로딩 화면 숨기기
+            document.getElementById('loading').style.display = 'none';
+            // 결제 완료 화면 표시
+            document.getElementById('paymentComplete').style.display = 'block';
+        }
+        
+        function payapp_fail(data) {
+            console.log('결제 실패:', data);
+            showMessage('결제가 취소되었습니다.', 'error');
+            resetForm();
+        }
+        
+        function payapp_close() {
+            console.log('PayApp 창 닫힘');
+            // 창이 닫혔을 때 로딩 화면 숨기기
+            document.getElementById('loading').style.display = 'none';
+        }
+        
         // 전화번호 자동 포맷팅
         document.getElementById('phone').addEventListener('input', function(e) {
             let value = e.target.value.replace(/[^0-9]/g, '');
@@ -554,6 +615,11 @@
                     return;
                 }
                 
+                // PayApp 콜백 함수 설정
+                PayApp.setCallback('complete', payapp_complete);
+                PayApp.setCallback('fail', payapp_fail);
+                PayApp.setCallback('close', payapp_close);
+                
                 // PayApp 파라미터 설정
                 PayApp.setParam('userid', 'tubelens');
                 PayApp.setParam('goodname', '튜브렌즈 월간 구독');
@@ -566,6 +632,10 @@
                 PayApp.setParam('openpaytype', 'card,phone');
                 PayApp.setParam('smsuse', 'n');
                 PayApp.setParam('memo', `인증키 발송 이메일: ${email}`);
+                
+                // 자동 닫기 관련 파라미터 (PayApp 버전에 따라 다를 수 있음)
+                PayApp.setParam('autoclose', 'Y'); // 자동 닫기 활성화
+                PayApp.setParam('closetype', 'auto'); // 자동 닫기 타입
                 
                 console.log('PayApp 정기결제 호출: phone=' + phone + ', email=' + email);
                 
@@ -597,6 +667,7 @@
             document.getElementById('subscriptionForm').style.display = 'block';
             document.getElementById('subscriptionInfo').style.display = 'none';
             document.getElementById('loading').style.display = 'none';
+            document.getElementById('paymentComplete').style.display = 'none';
             document.getElementById('agreeTerms').checked = false;
             document.getElementById('paymentBtn').disabled = true;
             hideMessage();
