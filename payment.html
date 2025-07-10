@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://lite.payapp.kr/public/api/v2/payapp-lite.js"></script>
+</head>
+<body>
+    <script>
+        // PayApp 라이브러리 로드를 기다린 후 실행
+        window.addEventListener('load', function() {
+            // 잠시 대기 후 실행 (라이브러리 완전 로드 대기)
+            setTimeout(function() {
+                startPayment();
+            }, 500);
+        });
+        
+        function startPayment() {
+            // PayApp 객체 확인
+            if (typeof PayApp === 'undefined') {
+                alert('결제 시스템을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                history.back();
+                return;
+            }
+            
+            // 1단계: 휴대폰 번호 입력
+            const phone = prompt('1단계: 휴대폰 번호를 입력하세요\n(예: 01012345678)');
+            if (!phone) {
+                history.back();
+                return;
+            }
+            
+            // 휴대폰 번호 검증
+            const cleanPhone = phone.replace(/[^0-9]/g, '');
+            if (cleanPhone.length !== 11 || !cleanPhone.startsWith('010')) {
+                alert('올바른 휴대폰 번호를 입력해주세요.');
+                history.back();
+                return;
+            }
+            
+            // 2단계: 이메일 주소 입력
+            const email = prompt('2단계: 이메일 주소를 입력하세요\n(인증키 발송용 - 정확히 입력해주세요!)');
+            if (!email) {
+                alert('이메일을 입력하지 않으면 인증키를 받을 수 없습니다.');
+                history.back();
+                return;
+            }
+            
+            // 이메일 형식 검증
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('올바른 이메일 형식을 입력해주세요.\n예: example@gmail.com');
+                history.back();
+                return;
+            }
+            
+            // 3단계: 확인 메시지
+            const confirmMessage = `입력하신 정보를 확인해주세요:
+            
+휴대폰: ${cleanPhone}
+이메일: ${email}
+
+인증키가 위 이메일로 발송됩니다.
+결제수단: 신용카드 또는 휴대폰 결제 선택 가능
+결제를 진행하시겠습니까?`;
+            
+            if (!confirm(confirmMessage)) {
+                history.back();
+                return;
+            }
+            
+            try {
+                // PayApp 정기결제 호출
+                PayApp.setParam({
+                    'userid': 'tubelens',
+                    'goodname': '튜브렌즈 월간 구독',
+                    'goodprice': '1000',
+                    'recvphone': cleanPhone,
+                    'feedbackurl': 'https://script.google.com/macros/s/AKfycbyygypGt_nPzzFyvVpbPzJ76a5Zy-GvmMNcj-7Jo87zZjvbuoy6qA9_gsQE-hLi9HtR/exec',
+                    'rebillCycleType': 'Month',
+                    'rebillCycleMonth': new Date().getDate().toString(),
+                    'rebillExpire': '2035-12-31',
+                    'openpaytype': 'card,phone',  // 카드와 휴대폰 결제 둘 다 지원
+                    'smsuse': 'n',
+                    'memo': `인증키 발송 이메일: ${email}` 
+                });
+                
+                PayApp.rebill();
+            } catch (error) {
+                console.error('PayApp 오류:', error);
+                alert('결제 시스템 오류가 발생했습니다. 다시 시도해주세요.');
+                history.back();
+            }
+        }
+    </script>
+</body>
+</html>
