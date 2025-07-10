@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>튜브렌즈 구독 해지</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+        
+        .subscription-list {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .subscription-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .subscription-info {
+            margin-bottom: 15px;
+        }
+        
+        .subscription-info h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subscription-info p {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 구독 해지</h1>
+            <p>구독 정보를 확인하고 해지할 수 있습니다</p>
+        </div>
+        
+        <div class="message" id="message"></div>
+        
+        <div id="loginForm">
+            <div class="form-group">
+                <label for="phone">휴대폰 번호</label>
+                <input type="tel" id="phone" placeholder="010-0000-0000" maxlength="13">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">이메일 주소</label>
+                <input type="email" id="email" placeholder="example@gmail.com">
+            </div>
+            
+            <button class="btn" onclick="checkSubscriptions()">구독 정보 조회</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>구독 정보를 조회하고 있습니다...</p>
+        </div>
+        
+        <div class="subscription-list" id="subscriptionList">
+            <h2>📋 구독 목록</h2>
+            <div id="subscriptionItems"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyygypGt_nPzzFyvVpbPzJ76a5Zy-GvmMNcj-7Jo87zZjvbuoy6qA9_gsQE-hLi9HtR/exec';
+        
+        // 전화번호 자동 포맷팅
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            if (value.length <= 11) {
+                if (value.length > 6) {
+                    value = value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+                } else if (value.length > 3) {
+                    value = value.replace(/(\d{3})(\d{4})/, '$1-$2');
+                }
+            }
+            e.target.value = value;
+        });
+        
+        // 구독 정보 조회
+        async function checkSubscriptions() {
+            const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
+            const email = document.getElementById('email').value.trim();
+            
+            // 입력 검증
+            if (!phoneInput || phoneInput.length < 8) {
+                showMessage('올바른 휴대폰 번호를 입력해주세요.', 'error');
+                return;
+            }
+            
+            if (!email || !email.includes('@')) {
+                showMessage('올바른 이메일 주소를 입력해주세요.', 'error');
+                return;
+            }
+            
+            // 전화번호 뒤 8자리 추출
+            const phoneLastDigits = phoneInput.slice(-8);
+            
+            console.log('입력된 전화번호:', phoneInput);
+            console.log('비교할 뒤 8자리:', phoneLastDigits);
+            
+            // 로딩 표시
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+            hideMessage();
+            
+            try {
+                // 뒤 8자리를 서버로 전송
+                const response = await fetch(`${API_URL}?action=getSubscriptions&phone=${phoneLastDigits}&email=${encodeURIComponent(email)}`);
+                const data = await response.json();
+                
+                console.log('서버 응답:', data);
+                
+                if (data.success && data.subscriptions && data.subscriptions.length > 0) {
+                    displaySubscriptions(data.subscriptions);
+                } else {
+                    showMessage('입력하신 정보와 일치하는 구독을 찾을 수 없습니다.', 'error');
+                    resetForm();
+                }
+                
+            } catch (error) {
+                console.error('조회 오류:', error);
+                showMessage('구독 정보 조회 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+                resetForm();
+            }
+            
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        // 구독 목록 표시
+        function displaySubscriptions(subscriptions) {
+            const container = document.getElementById('subscriptionItems');
+            container.innerHTML = '';
+            
+            // 등록완료된 구독만 필터링
+            const activeSubscriptions = subscriptions.filter(sub => sub.status === '등록완료');
+            
+            if (activeSubscriptions.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">해지 가능한 활성 구독이 없습니다.</p>';
+                document.getElementById('subscriptionList').style.display = 'block';
+                return;
+            }
+            
+            activeSubscriptions.forEach((sub, index) => {
+                // 날짜 포맷팅
+                const registDate = new Date(sub.date).toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit', 
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const itemHTML = `
+                    <div class="subscription-item">
+                        <div class="subscription-info">
+                            <h3>${sub.goodname}</h3>
+                            <p><strong>금액:</strong> ${parseInt(sub.price).toLocaleString()}원</p>
+                            <p><strong>상태:</strong> <span class="status active">활성</span></p>
+                            <p><strong>등록일:</strong> ${registDate}</p>
+                            <p><strong>구독번호:</strong> ${sub.rebill_no}</p>
+                        </div>
+                        <button class="btn btn-danger" onclick="cancelSubscription('${sub.rebill_no}', ${index})">
+                            🚫 구독 해지하기
+                        </button>
+                    </div>
+                `;
+                
+                container.innerHTML += itemHTML;
+            });
+            
+            document.getElementById('subscriptionList').style.display = 'block';
+        }
+        
+        // 구독 해지
+        async function cancelSubscription(rebillNo, index) {
+            if (!confirm('정말로 구독을 해지하시겠습니까?\n해지 후에는 다음 달부터 결제가 중단됩니다.')) {
+                return;
+            }
+            
+            const button = event.target;
+            button.disabled = true;
+            button.innerHTML = '해지 처리 중...';
+            
+            // 입력된 전화번호와 이메일 가져오기
+            const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
+            const emailInput = document.getElementById('email').value.trim();
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=cancelSubscription&rebill_no=${rebillNo}&phone=${phoneInput}&email=${encodeURIComponent(emailInput)}`
+                });
+                
+                const result = await response.text();
+                
+                if (result.includes('state=1') || result.includes('SUCCESS')) {
+                    showMessage('구독이 성공적으로 해지되었습니다.', 'success');
+                    button.innerHTML = '✅ 해지 완료';
+                    button.style.background = '#28a745';
+                    
+                    // 상태 업데이트
+                    const statusElement = button.parentElement.querySelector('.status');
+                    statusElement.textContent = '해지됨';
+                    statusElement.className = 'status';
+                    statusElement.style.background = '#f8d7da';
+                    statusElement.style.color = '#721c24';
+                    
+                } else {
+                    throw new Error('해지 실패');
+                }
+                
+            } catch (error) {
+                console.error('해지 오류:', error);
+                showMessage('구독 해지 중 오류가 발생했습니다. 고객센터로 문의해주세요.', 'error');
+                button.disabled = false;
+                button.innerHTML = '🚫 구독 해지하기';
+            }
+        }
+        
+        // 메시지 표시
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+        }
+        
+        // 메시지 숨기기
+        function hideMessage() {
+            document.getElementById('message').style.display = 'none';
+        }
+        
+        // 폼 리셋
+        function resetForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('subscriptionList').style.display = 'none';
+        }
+        
+        // 엔터키 지원
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.getElementById('loginForm').style.display !== 'none') {
+                checkSubscriptions();
+            }
+        });
+    </script>
+</body>
+</html>
