@@ -422,6 +422,11 @@
         
         <div id="subscriptionForm">
             <div class="form-group">
+                <label for="name">이름</label>
+                <input type="text" id="name" placeholder="홍길동">
+            </div>
+            
+            <div class="form-group">
                 <label for="phone">휴대폰 번호</label>
                 <input type="tel" id="phone" placeholder="010-0000-0000" maxlength="13">
             </div>
@@ -453,6 +458,7 @@
         <div class="subscription-info" id="subscriptionInfo">
             <div class="user-info-confirm" id="userInfoConfirm">
                 <h4>📋 입력하신 정보를 확인해주세요</h4>
+                <p><strong>이름:</strong> <span id="confirmName"></span></p>
                 <p><strong>휴대폰:</strong> <span id="confirmPhone"></span></p>
                 <p><strong>이메일:</strong> <span id="confirmEmail"></span></p>
             </div>
@@ -563,10 +569,16 @@
         
         // 구독 정보 확인
         function showSubscriptionInfo() {
+            const name = document.getElementById('name').value.trim();
             const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
             const email = document.getElementById('email').value.trim();
             
-            // 입력 검증
+            // 입력 검증 (이름부터)
+            if (!name || name.length < 2) {
+                showMessage('이름을 올바르게 입력해주세요.', 'error');
+                return;
+            }
+            
             if (!phoneInput || phoneInput.length !== 11 || !phoneInput.startsWith('010')) {
                 showMessage('올바른 휴대폰 번호를 입력해주세요.', 'error');
                 return;
@@ -579,6 +591,7 @@
             
             // 사용자 정보 확인란에 표시
             const formattedPhone = phoneInput.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+            document.getElementById('confirmName').textContent = name;
             document.getElementById('confirmPhone').textContent = formattedPhone;
             document.getElementById('confirmEmail').textContent = email;
             
@@ -594,6 +607,7 @@
         
         // 결제 시작
         function startPayment() {
+            const name = document.getElementById('name').value.trim();
             const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
             const email = document.getElementById('email').value.trim();
             const agreeTerms = document.getElementById('agreeTerms').checked;
@@ -610,15 +624,15 @@
             
             // 잠시 대기 후 PayApp 호출
             setTimeout(function() {
-                callPayApp(phoneInput, email);
+                callPayApp(name, phoneInput, email);
             }, 1000);
         }
         
         // PayApp 호출
-        function callPayApp(phone, email) {
+        function callPayApp(name, phone, email) {
             try {
                 console.log('🚀 PayApp 호출 시작');
-                console.log('전화번호:', phone, '이메일:', email);
+                console.log('이름:', name, '전화번호:', phone, '이메일:', email);
                 
                 // PayApp 객체 확인
                 if (typeof PayApp === 'undefined') {
@@ -636,16 +650,18 @@
                 PayApp.setParam('goodname', '튜브렌즈 월간 구독');
                 PayApp.setParam('goodprice', '1000');
                 PayApp.setParam('recvphone', phone);
-                PayApp.setParam('feedbackurl', 'https://script.google.com/macros/s/AKfycbwds2BzDJU3NCVGF75efSNZhO2ZOmgaDqPR2NMFQH1hVA3zeM2pSx-zHdS7VKCgark/exec');
+                PayApp.setParam('feedbackurl', 'https://script.google.com/macros/s/AKfycbx0tqIlFg7xJIBcbE1uLejCSPiDcvy29fsPPFmJwWr29jIapDFcf9lCeFpyjHsELsBd/exec');
                 PayApp.setParam('rebillCycleType', 'Month');
                 PayApp.setParam('rebillCycleMonth', new Date().getDate().toString());
                 PayApp.setParam('rebillExpire', '2035-12-31');
                 PayApp.setParam('openpaytype', 'card,phone');
                 PayApp.setParam('smsuse', 'n');
                 PayApp.setParam('memo', `인증키 발송 이메일: ${email}`);
+                PayApp.setParam('var1', name);
                 
                 console.log('✅ PayApp 파라미터 설정 완료');
                 console.log('결제일:', new Date().getDate().toString());
+                console.log('이름(var1):', name);
                 
                 // 자동 닫기 관련 파라미터 (PayApp 버전에 따라 다를 수 있음)
                 PayApp.setParam('autoclose', 'Y'); // 자동 닫기 활성화
