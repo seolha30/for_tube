@@ -556,7 +556,7 @@
                 <h4>🔍 검색 안내</h4>
                 <ul>
                     <li>인증키 신청 후 <strong>10분이 지나야</strong> 검색 가능합니다</li>
-                    <li>이름은 구독시 입력한 이름과 정확히 일치해야 합니다</li>
+                    <li>이름은 결제시 입력한 이름과 정확히 일치해야 합니다</li>
                     <li>전화번호는 뒤 8자리만 일치하면 찾을 수 있습니다</li>
                     <li>전화번호에 하이픈(-)이 있어도 자동으로 처리됩니다</li>
                 </ul>
@@ -818,52 +818,7 @@
             }
         }
         
-        // 시뮬레이션 데이터 검색
-        function simulateSearchData(name, phone) {
-            // 시뮬레이션을 위한 더미 데이터
-            const authKeyData = [
-                { 
-                    name: '홍길동', 
-                    phone: '01012345678', 
-                    authKey: 'TL-ABCD-EFGH-1234',
-                    issueDate: '2025-01-15',
-                    expireDate: '2025-02-15',
-                    email: 'hong@example.com',
-                    source: '유료완료'
-                },
-                { 
-                    name: '김철수', 
-                    phone: '01098765432', 
-                    authKey: 'TL-WXYZ-QRST-5678',
-                    issueDate: '2025-01-20',
-                    expireDate: '(무제한)',
-                    email: 'kim@example.com',
-                    source: '정기결제'
-                },
-                { 
-                    name: '이영희', 
-                    phone: '01055556666', 
-                    authKey: 'TL-MNOP-UVWX-9012',
-                    issueDate: '2025-01-10',
-                    expireDate: '2025-03-10',
-                    email: 'lee@example.com',
-                    source: '유료완료'
-                }
-            ];
-            
-            // 이름 완전 일치 확인
-            const nameMatches = authKeyData.filter(user => user.name === name);
-            
-            if (nameMatches.length === 0) {
-                return null;
-            }
-            
-            // 전화번호 뒤 8자리 일치 확인
-            const last8Digits = phone.slice(-8);
-            const phoneMatch = nameMatches.find(user => user.phone.slice(-8) === last8Digits);
-            
-            return phoneMatch || null;
-        }
+
         
         // 검색 결과 표시 (여러 결과 지원)
         function showSearchResult(success, message, authKeyDataArray = null) {
