@@ -932,10 +932,10 @@
                         <div class="auth-key-item" style="margin-bottom: 30px; ${index > 0 ? 'border-top: 2px solid #eee; padding-top: 20px;' : ''}">
                             ${keyNumber ? `<h5 style="color: #667eea; margin-bottom: 15px;">인증키${keyNumber} ${index === 0 ? '<span style="color: #28a745; font-size: 14px;">(최신)</span>' : ''}</h5>` : ''}
                             
-                            <div class="auth-key-display" id="authKeyDisplay${index}">
+                            <div class="auth-key-display" id="authKeyDisplay${index}" style="${expireClass === 'subscription-expired' ? 'opacity: 0.6; filter: grayscale(50%);' : ''}">
                                 ${authKeyData.authKey}
                             </div>
-                            <button class="copy-button" onclick="copyAuthKey('${authKeyData.authKey}')">📋 인증키 복사</button>
+                            ${expireClass !== 'subscription-expired' ? `<button class="copy-button" onclick="copyAuthKey('${authKeyData.authKey}')">📋 인증키 복사</button>` : '<div style="text-align: center; padding: 10px; color: #999; font-size: 14px;">만료된 인증키입니다</div>'}
                             
                             <div class="user-details">
                                 <div class="detail-item">
