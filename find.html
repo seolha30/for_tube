@@ -786,8 +786,6 @@
         }
         // 실제 검색 함수 (새로운 Google Apps Script API 사용)
         async function performSearch(name, phone) {
-            document.getElementById('loading').style.display = 'none';
-            
             try {
                 console.log('🔍 검색 시작:', name, phone);
                 
@@ -804,6 +802,9 @@
                 const data = await response.json();
                 console.log('📋 API 응답 데이터:', data);
                 
+                // 로딩 숨기기 (API 응답 받은 후)
+                document.getElementById('loading').style.display = 'none';
+                
                 if (data.success && data.authKeys && data.authKeys.length > 0) {
                     console.log('✅ 인증키 발견! 개수:', data.authKeys.length);
                     showSearchResult(true, '인증키를 찾았습니다!', data.authKeys);
@@ -814,6 +815,8 @@
                 
             } catch (error) {
                 console.error('❌ 검색 오류:', error);
+                // 에러 발생시에도 로딩 숨기기
+                document.getElementById('loading').style.display = 'none';
                 showSearchResult(false, '검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
             }
         }
