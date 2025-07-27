@@ -838,6 +838,13 @@
             resultSection.className = 'result-section ' + (success ? 'success' : 'error');
             
             if (success && authKeyDataArray && authKeyDataArray.length > 0) {
+                // 발급일 기준으로 최신순 정렬 (내림차순)
+                authKeyDataArray.sort((a, b) => {
+                    const dateA = new Date(a.issueDate);
+                    const dateB = new Date(b.issueDate);
+                    return dateB - dateA; // 최신 날짜가 먼저 오도록
+                });
+                
                 // 날짜 포맷팅 함수
                 function formatDate(dateString) {
                     if (!dateString) return '-';
@@ -869,7 +876,7 @@
                 let resultHTML = `<h4>✅ ${authKeyDataArray[0].name}님의 인증키입니다</h4>`;
                 
                 if (authKeyDataArray.length > 1) {
-                    resultHTML += `<p style="color: #666; margin-bottom: 20px;">총 <strong>${authKeyDataArray.length}개</strong>의 인증키를 찾았습니다.</p>`;
+                    resultHTML += `<p style="color: #666; margin-bottom: 20px;">총 <strong>${authKeyDataArray.length}개</strong>의 인증키를 찾았습니다. (최신순)</p>`;
                 }
                 
                 // 각 인증키별로 표시
@@ -923,7 +930,7 @@
                     
                     resultHTML += `
                         <div class="auth-key-item" style="margin-bottom: 30px; ${index > 0 ? 'border-top: 2px solid #eee; padding-top: 20px;' : ''}">
-                            ${keyNumber ? `<h5 style="color: #667eea; margin-bottom: 15px;">인증키${keyNumber}</h5>` : ''}
+                            ${keyNumber ? `<h5 style="color: #667eea; margin-bottom: 15px;">인증키${keyNumber} ${index === 0 ? '<span style="color: #28a745; font-size: 14px;">(최신)</span>' : ''}</h5>` : ''}
                             
                             <div class="auth-key-display" id="authKeyDisplay${index}">
                                 ${authKeyData.authKey}
