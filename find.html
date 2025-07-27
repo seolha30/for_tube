@@ -911,6 +911,14 @@
                     const isUnlimited = authKeyData.expireDate && authKeyData.expireDate.includes('(무제한)');
                     const expireText = isUnlimited ? '<strong>구독중</strong>' : formatDate(authKeyData.expireDate);
                     
+                    // 구분 처리
+                    let sourceText = authKeyData.source;
+                    if (authKeyData.source === '유료완료') {
+                        sourceText = '유료결제';
+                    } else if (authKeyData.source === '정기결제') {
+                        sourceText = '정기결제';
+                    }
+                    
                     const keyNumber = authKeyDataArray.length > 1 ? ` #${index + 1}` : '';
                     
                     resultHTML += `
@@ -937,7 +945,7 @@
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">구분:</span>
-                                    <span class="detail-value">${authKeyData.source === '유료완료' ? '유료결제' : '정기결제'}</span>
+                                    <span class="detail-value">${sourceText}</span>
                                 </div>
                             </div>
                         </div>
