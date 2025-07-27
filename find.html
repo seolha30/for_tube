@@ -400,6 +400,15 @@
             border: 1px solid #c3e6cb;
         }
         
+        .detail-value.subscription-expired {
+            color: #dc3545;
+            font-weight: bold;
+            background: #f8d7da;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #f5c6cb;
+        }
+        
         .error-message-main {
             text-align: center;
             margin-bottom: 25px;
@@ -865,9 +874,42 @@
                 
                 // 각 인증키별로 표시
                 authKeyDataArray.forEach((authKeyData, index) => {
-                    // 만료일 처리 - "(무제한)" 문자열 포함 여부 확인
+                    // 만료일 처리
+                    let expireText, expireClass = '';
                     const isUnlimited = authKeyData.expireDate && authKeyData.expireDate.includes('(무제한)');
-                    const expireText = isUnlimited ? '<strong>구독중</strong>' : formatDate(authKeyData.expireDate);
+                    
+                    if (isUnlimited) {
+                        expireText = '<strong>구독중</strong>';
+                        expireClass = 'subscription-active';
+                    } else {
+                        // 현재 날짜와 만료일 비교
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0); // 시간 초기화
+                        
+                        let expireDate = null;
+                        if (authKeyData.expireDate) {
+                            // 만료일 파싱
+                            if (authKeyData.expireDate.includes('-')) {
+                                expireDate = new Date(authKeyData.expireDate.split(' ')[0]); // "2025-05-18 (만료됨)" 에서 날짜 부분만
+                            } else {
+                                expireDate = new Date(authKeyData.expireDate);
+                            }
+                        }
+                        
+                        if (expireDate && !isNaN(expireDate.getTime())) {
+                            if (expireDate < today) {
+                                // 만료됨
+                                expireText = '<strong>만료됨</strong>';
+                                expireClass = 'subscription-expired';
+                            } else {
+                                // 아직 유효
+                                expireText = formatDate(authKeyData.expireDate);
+                            }
+                        } else {
+                            // 날짜 파싱 실패시 원본 표시
+                            expireText = authKeyData.expireDate;
+                        }
+                    }
                     
                     // 구분 처리
                     let sourceText = authKeyData.source;
@@ -895,7 +937,7 @@
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">만료일:</span>
-                                    <span class="detail-value ${isUnlimited ? 'subscription-active' : ''}">${expireText}</span>
+                                    <span class="detail-value ${expireClass}">${expireText}</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">이메일:</span>
