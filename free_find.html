@@ -536,7 +536,7 @@
             <div class="time-check-section">
                 <div class="time-check-warning">
                     <h4>⏰ 인증키 신청 한지 10분이 지났나요?</h4>
-                    <p>인증키 신청 후, 10분이 지나야 검색 가능합니다</p>
+                    <p>인증키 신청 후, <strong>10분이 지나야 </strong>검색 가능합니다</p>
                     <div class="checkbox-container">
                         <label class="checkbox-label">
                             <div class="custom-checkbox">
@@ -592,12 +592,10 @@
             const emailLabel = document.getElementById('emailLabel');
             
             if (!timeCheckbox || !nameInput || !emailInput || !searchButton) {
-                console.error('필수 요소들을 찾을 수 없습니다');
                 return;
             }
             
             const isChecked = timeCheckbox.checked;
-            console.log('체크박스 상태:', isChecked);
             
             if (isChecked) {
                 // 활성화
@@ -608,7 +606,6 @@
                 if (nameLabel) nameLabel.classList.remove('disabled');
                 if (emailLabel) emailLabel.classList.remove('disabled');
                 
-                console.log('입력란 활성화됨');
                 // 체크 후 이름 입력란에 포커스
                 setTimeout(() => nameInput.focus(), 100);
             } else {
@@ -623,8 +620,6 @@
                 // 입력값 초기화
                 nameInput.value = '';
                 emailInput.value = '';
-                
-                console.log('입력란 비활성화됨');
             }
         }
         
@@ -665,8 +660,6 @@
         // 실제 검색 함수 (직접 CSV 가져오기)
         async function performSearch(name, email) {
             try {
-                console.log('🔍 검색 시작:', name, email);
-                
                 // 구글시트 CSV 직접 가져오기
                 const sheets = [
                     {
@@ -683,8 +676,6 @@
                 
                 for (const sheet of sheets) {
                     try {
-                        console.log(`📊 ${sheet.name} 시트 검색 중...`);
-                        
                         // CORS 우회를 위한 프록시 사용
                         const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(sheet.url)}`;
                         const response = await fetch(proxyUrl);
@@ -694,10 +685,7 @@
                         }
                         
                         const csvText = await response.text();
-                        console.log(`📄 ${sheet.name} CSV 데이터 길이:`, csvText.length);
-                        
                         const rows = parseCSV(csvText);
-                        console.log(`📊 ${sheet.name} 파싱된 행 수:`, rows.length);
                         
                         // 헤더 건너뛰고 데이터 행들 검사
                         for (let i = 1; i < rows.length; i++) {
@@ -710,11 +698,8 @@
                             const rowAuthKey = row[4]?.trim(); // E열: 라이센스키
                             const rowType = row[5]?.trim(); // F열: 타입
                             
-                            console.log(`👤 행 ${i} - 이름: "${rowName}", 이메일: "${rowEmail}", 인증키: "${rowAuthKey}"`);
-                            
                             // 이름과 이메일 완전 일치 확인
                             if (rowName === name && rowEmail === email && rowAuthKey) {
-                                console.log('✅ 일치하는 데이터 발견!');
                                 foundKeys.push({
                                     name: rowName,
                                     email: rowEmail,
@@ -727,7 +712,7 @@
                             }
                         }
                     } catch (error) {
-                        console.error(`❌ ${sheet.name} 시트 검색 오류:`, error);
+                        // 에러 로그만 최소한으로
                     }
                 }
                 
@@ -735,15 +720,12 @@
                 document.getElementById('loading').style.display = 'none';
                 
                 if (foundKeys.length > 0) {
-                    console.log('✅ 인증키 발견! 개수:', foundKeys.length);
                     showSearchResult(true, '인증키를 찾았습니다!', foundKeys);
                 } else {
-                    console.log('❌ 인증키 찾지 못함');
                     showSearchResult(false, '일치하는 정보를 찾을 수 없습니다.');
                 }
                 
             } catch (error) {
-                console.error('❌ 검색 오류:', error);
                 document.getElementById('loading').style.display = 'none';
                 showSearchResult(false, '검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
             }
@@ -1006,7 +988,6 @@
             const timeCheckbox = document.getElementById('timeCheck');
             if (timeCheckbox) {
                 timeCheckbox.addEventListener('change', toggleFormElements);
-                console.log('체크박스 이벤트 리스너 설정됨');
             }
         }
         
@@ -1026,7 +1007,6 @@
         
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('페이지 로드됨');
             setupEventListeners();
             toggleFormElements(); // 초기 상태를 비활성화로 설정
         });
