@@ -657,70 +657,19 @@
             }, 2000);
         }
         
-        // 실제 검색 함수 (직접 CSV 가져오기)
+        // 실제 검색 함수 (Google Apps Script API 사용)
         async function performSearch(name, email) {
             try {
-                // 구글시트 CSV 직접 가져오기
-                const sheets = [
-                    {
-                        name: '3일무료완료',
-                        url: 'https://docs.google.com/spreadsheets/d/17ngy8Lfb4SXdpLQ6xMWrOLAxpSRhBLlQtxJg_tEUSQU/export?format=csv&gid=779373354'
-                    },
-                    {
-                        name: '15일무료완료', 
-                        url: 'https://docs.google.com/spreadsheets/d/17ngy8Lfb4SXdpLQ6xMWrOLAxpSRhBLlQtxJg_tEUSQU/export?format=csv&gid=292856036'
-                    }
-                ];
+                const API_URL = 'https://script.google.com/macros/s/AKfycby-fQmIj_2jovtXGD488uOyP1EzVaPaXhXXgzwyFVK48FXvpJoFcdqXfzVaX_nlt7qe2A/exec';
+                const response = await fetch(`${API_URL}?action=findFreeAuthKey&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`);
                 
-                let foundKeys = [];
-                
-                for (const sheet of sheets) {
-                    try {
-                        // CORS 우회를 위한 프록시 사용
-                        const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(sheet.url)}`;
-                        const response = await fetch(proxyUrl);
-                        
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
-                        
-                        const csvText = await response.text();
-                        const rows = parseCSV(csvText);
-                        
-                        // 헤더 건너뛰고 데이터 행들 검사
-                        for (let i = 1; i < rows.length; i++) {
-                            const row = rows[i];
-                            
-                            const rowIssueDate = row[0]?.trim(); // A열: 발급일자
-                            const rowEmail = row[1]?.trim(); // B열: 이메일
-                            const rowName = row[2]?.trim(); // C열: 사용자정보(이름)
-                            const rowExpireDate = row[3]?.trim(); // D열: 만료일
-                            const rowAuthKey = row[4]?.trim(); // E열: 라이센스키
-                            const rowType = row[5]?.trim(); // F열: 타입
-                            
-                            // 이름과 이메일 완전 일치 확인
-                            if (rowName === name && rowEmail === email && rowAuthKey) {
-                                foundKeys.push({
-                                    name: rowName,
-                                    email: rowEmail,
-                                    authKey: rowAuthKey,
-                                    issueDate: rowIssueDate,
-                                    expireDate: rowExpireDate,
-                                    type: rowType,
-                                    source: sheet.name
-                                });
-                            }
-                        }
-                    } catch (error) {
-                        // 에러 처리
-                    }
-                }
+                const data = await response.json();
                 
                 // 로딩 숨기기
                 document.getElementById('loading').style.display = 'none';
                 
-                if (foundKeys.length > 0) {
-                    showSearchResult(true, '인증키를 찾았습니다!', foundKeys);
+                if (data.success && data.authKeys && data.authKeys.length > 0) {
+                    showSearchResult(true, '인증키를 찾았습니다!', data.authKeys);
                 } else {
                     showSearchResult(false, '일치하는 정보를 찾을 수 없습니다.');
                 }
