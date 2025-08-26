@@ -680,35 +680,7 @@
             }
         }
         
-        // CSV 파서
-        function parseCSV(text) {
-            const rows = [];
-            const lines = text.split('\n');
-            
-            for (const line of lines) {
-                if (line.trim()) {
-                    const row = [];
-                    let current = '';
-                    let inQuotes = false;
-                    
-                    for (let i = 0; i < line.length; i++) {
-                        const char = line[i];
-                        if (char === '"') {
-                            inQuotes = !inQuotes;
-                        } else if (char === ',' && !inQuotes) {
-                            row.push(current);
-                            current = '';
-                        } else {
-                            current += char;
-                        }
-                    }
-                    row.push(current);
-                    rows.push(row);
-                }
-            }
-            
-            return rows;
-        }
+
         
         // 검색 결과 표시 (여러 결과 지원)
         function showSearchResult(success, message, authKeyDataArray = null) {
