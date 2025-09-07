@@ -1,11 +1,7 @@
 {
   "name": "for-tube",
   "version": "1.0.0",
-  "type": "module",
   "engines": {
     "node": "18.x"
-  },
-  "dependencies": {
-    "ytdl-core": "^4.11.5"
   }
 }
