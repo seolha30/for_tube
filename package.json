@@ -1,0 +1,12 @@
+{
+  "name": "subtitle-api",
+  "version": "1.0.0",
+  "description": "YouTube subtitle extraction API",
+  "main": "index.js",
+  "dependencies": {
+    "ytdl-core": "^4.11.5"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
