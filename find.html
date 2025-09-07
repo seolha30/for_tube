@@ -583,6 +583,9 @@
     </div>
 
     <script>
+        // Google Apps Script 배포 URL
+        const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycby-fQmIj_2jovtXGD488uOyP1EzVaPaXhXXgzwyFVK48FXvpJoFcdqXfzVaX_nlt7qe2A/exec';
+        
         // 전화번호 자동 포맷팅
         function setupPhoneFormatting() {
             const phoneInput = document.getElementById('phone');
@@ -616,10 +619,8 @@
             }
             
             const isChecked = timeCheckbox.checked;
-            console.log('체크박스 상태:', isChecked);
             
             if (isChecked) {
-                // 활성화
                 nameInput.disabled = false;
                 phoneInput.disabled = false;
                 searchButton.disabled = false;
@@ -627,11 +628,8 @@
                 if (nameLabel) nameLabel.classList.remove('disabled');
                 if (phoneLabel) phoneLabel.classList.remove('disabled');
                 
-                console.log('입력란 활성화됨');
-                // 체크 후 이름 입력란에 포커스
                 setTimeout(() => nameInput.focus(), 100);
             } else {
-                // 비활성화
                 nameInput.disabled = true;
                 phoneInput.disabled = true;
                 searchButton.disabled = true;
@@ -639,27 +637,22 @@
                 if (nameLabel) nameLabel.classList.add('disabled');
                 if (phoneLabel) phoneLabel.classList.add('disabled');
                 
-                // 입력값 초기화
                 nameInput.value = '';
                 phoneInput.value = '';
-                
-                console.log('입력란 비활성화됨');
             }
         }
         
-        // 인증키 검색 확인
-        function searchAuthKey() {
+        // 인증키 검색 (보안 버전)
+        async function searchAuthKey() {
             const timeCheckbox = document.getElementById('timeCheck');
             const name = document.getElementById('name').value.trim();
             const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
             
-            // 시간 체크 확인
             if (!timeCheckbox.checked) {
                 showMessage('먼저 10분 경과 여부를 확인해주세요.', 'error');
                 return;
             }
             
-            // 입력 검증
             if (!name || name.length < 2) {
                 showMessage('이름을 올바르게 입력해주세요. (2글자 이상)', 'error');
                 return;
@@ -670,200 +663,53 @@
                 return;
             }
             
-            // 바로 로딩 표시하고 검색 시작
             document.getElementById('searchForm').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
             hideMessage();
             
-            // 실제 검색 로직
-            setTimeout(function() {
-                performSearch(name, phoneInput);
-            }, 2000);
-        }
-        
-
-        // Google Sheets에서 데이터 검색 (웹에 게시된 CSV 사용)
-        async function searchFromGoogleSheets(name, phone) {
             try {
-                console.log('🔍 검색 시작:', name, phone);
+                const phoneLastDigits = phoneInput.slice(-8);
+                const response = await fetch(`${API_ENDPOINT}?action=findAuthKey&name=${encodeURIComponent(name)}&phone=${phoneLastDigits}`);
                 
-                // 웹에 게시된 CSV 링크들
-                const sheets = [
-                    {
-                        name: '유료완료',
-                        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRY3ywOR-0nvcnaffcMHXTzUWIu9h_Rmrc5SrMR6V086iDECdvncrlGbnoU0PcmnyOzfFrs_YFan-YR/pub?gid=222165253&single=true&output=csv'
-                    },
-                    {
-                        name: '정기결제', 
-                        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRY3ywOR-0nvcnaffcMHXTzUWIu9h_Rmrc5SrMR6V086iDECdvncrlGbnoU0PcmnyOzfFrs_YFan-YR/pub?gid=637641307&single=true&output=csv'
-                    }
-                ];
-                
-                const last8Digits = phone.slice(-8);
-                console.log('🔍 찾을 전화번호 뒤 8자리:', last8Digits);
-                
-                for (const sheet of sheets) {
-                    try {
-                        console.log(`📊 ${sheet.name} 시트 검색 중...`);
-                        
-                        const response = await fetch(sheet.url);
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
-                        
-                        const csvText = await response.text();
-                        console.log(`📄 ${sheet.name} CSV 데이터 길이:`, csvText.length);
-                        console.log(`📄 ${sheet.name} CSV 첫 200자:`, csvText.substring(0, 200));
-                        
-                        const rows = parseCSV(csvText);
-                        console.log(`📊 ${sheet.name} 파싱된 행 수:`, rows.length);
-                        
-                        if (rows.length > 0) {
-                            console.log(`📊 ${sheet.name} 헤더:`, rows[0]);
-                        }
-                        
-                        // 헤더 건너뛰고 데이터 행들 검사
-                        for (let i = 1; i < rows.length; i++) {
-                            const row = rows[i];
-                            console.log(`📋 ${sheet.name} ${i}번째 행:`, row);
-                            
-                            const rowName = row[4]?.trim(); // E열: 사용자정보(이름)
-                            const rowPhone = row[5]?.replace(/[^0-9]/g, ''); // F열: 연락처
-                            const rowAuthKey = row[9]?.trim(); // J열: 라이센스키
-                            
-                            console.log(`👤 행 ${i} - 이름: "${rowName}", 전화번호: "${rowPhone}", 인증키: "${rowAuthKey}"`);
-                            
-                            // 이름 완전 일치 + 전화번호 뒤 8자리 일치 확인
-                            if (rowName === name && rowPhone && rowPhone.slice(-8) === last8Digits) {
-                                console.log('✅ 일치하는 데이터 발견!');
-                                return {
-                                    name: rowName,
-                                    phone: rowPhone,
-                                    authKey: rowAuthKey,
-                                    issueDate: row[2]?.trim(), // C열: 발급일자
-                                    expireDate: row[8]?.trim(), // I열: 만료일
-                                    email: row[3]?.trim(), // D열: 이메일
-                                    source: sheet.name
-                                };
-                            } else {
-                                console.log(`❌ 불일치 - 이름: ${rowName === name}, 전화번호: ${rowPhone && rowPhone.slice(-8) === last8Digits}`);
-                            }
-                        }
-                    } catch (error) {
-                        console.error(`❌ ${sheet.name} 시트 검색 오류:`, error);
-                    }
+                if (!response.ok) {
+                    throw new Error('서버 응답 오류');
                 }
-                
-                console.log('❌ 모든 시트에서 일치하는 데이터를 찾지 못함');
-                return null; // 찾지 못함
-                
-            } catch (error) {
-                console.error('❌ Google Sheets 검색 오류:', error);
-                throw error;
-            }
-        }
-        
-        // 간단한 CSV 파서
-        function parseCSV(text) {
-            const rows = [];
-            const lines = text.split('\n');
-            
-            for (const line of lines) {
-                if (line.trim()) {
-                    // 간단한 CSV 파싱 (따옴표 처리 포함)
-                    const row = [];
-                    let current = '';
-                    let inQuotes = false;
-                    
-                    for (let i = 0; i < line.length; i++) {
-                        const char = line[i];
-                        if (char === '"') {
-                            inQuotes = !inQuotes;
-                        } else if (char === ',' && !inQuotes) {
-                            row.push(current);
-                            current = '';
-                        } else {
-                            current += char;
-                        }
-                    }
-                    row.push(current);
-                    rows.push(row);
-                }
-            }
-            
-            return rows;
-        }
-        // 실제 검색 함수 (새로운 Google Apps Script API 사용)
-        async function performSearch(name, phone) {
-            try {
-                console.log('🔍 검색 시작:', name, phone);
-                
-                // 전화번호 뒤 8자리 추출
-                const phoneLastDigits = phone.slice(-8);
-                console.log('🔍 전화번호 뒤 8자리:', phoneLastDigits);
-                
-                // 새로운 Google Apps Script API 호출
-                const API_URL = 'https://script.google.com/macros/s/AKfycby-fQmIj_2jovtXGD488uOyP1EzVaPaXhXXgzwyFVK48FXvpJoFcdqXfzVaX_nlt7qe2A/exec';
-                const response = await fetch(`${API_URL}?action=findAuthKey&name=${encodeURIComponent(name)}&phone=${phoneLastDigits}`);
-                
-                console.log('📡 API 응답 상태:', response.status);
                 
                 const data = await response.json();
-                console.log('📋 API 응답 데이터:', data);
                 
-                // 로딩 숨기기 (API 응답 받은 후)
                 document.getElementById('loading').style.display = 'none';
                 
                 if (data.success && data.authKeys && data.authKeys.length > 0) {
-                    console.log('✅ 인증키 발견! 개수:', data.authKeys.length);
                     showSearchResult(true, '인증키를 찾았습니다!', data.authKeys);
                 } else {
-                    console.log('❌ 인증키 찾지 못함');
-                    showSearchResult(false, '일치하는 정보를 찾을 수 없습니다.');
+                    showSearchResult(false, data.message || '일치하는 정보를 찾을 수 없습니다.');
                 }
                 
             } catch (error) {
-                console.error('❌ 검색 오류:', error);
-                // 에러 발생시에도 로딩 숨기기
+                console.error('검색 오류:', error);
                 document.getElementById('loading').style.display = 'none';
                 showSearchResult(false, '검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
             }
         }
         
-
-        
-        // 검색 결과 표시 (여러 결과 지원)
+        // 검색 결과 표시 (기존과 동일)
         function showSearchResult(success, message, authKeyDataArray = null) {
             const resultSection = document.getElementById('resultSection');
             resultSection.className = 'result-section ' + (success ? 'success' : 'error');
             
             if (success && authKeyDataArray && authKeyDataArray.length > 0) {
-                // 발급일 기준으로 최신순 정렬 (내림차순)
                 authKeyDataArray.sort((a, b) => {
                     const dateA = new Date(a.issueDate);
                     const dateB = new Date(b.issueDate);
-                    return dateB - dateA; // 최신 날짜가 먼저 오도록
+                    return dateB - dateA;
                 });
                 
-                // 날짜 포맷팅 함수
                 function formatDate(dateString) {
                     if (!dateString) return '-';
                     
-                    // 다양한 날짜 형식 처리
-                    let date;
-                    if (dateString.includes('/')) {
-                        // MM/DD/YYYY 또는 YYYY/MM/DD 형식
-                        date = new Date(dateString);
-                    } else if (dateString.includes('-')) {
-                        // YYYY-MM-DD 형식
-                        date = new Date(dateString);
-                    } else {
-                        // 기타 형식
-                        date = new Date(dateString);
-                    }
-                    
+                    let date = new Date(dateString);
                     if (isNaN(date.getTime())) {
-                        return dateString; // 파싱 실패시 원본 반환
+                        return dateString;
                     }
                     
                     const year = date.getFullYear();
@@ -879,9 +725,7 @@
                     resultHTML += `<p style="color: #666; margin-bottom: 20px;">총 <strong>${authKeyDataArray.length}개</strong>의 인증키를 찾았습니다. (최신순)</p>`;
                 }
                 
-                // 각 인증키별로 표시
                 authKeyDataArray.forEach((authKeyData, index) => {
-                    // 만료일 처리
                     let expireText, expireClass = '';
                     const isUnlimited = authKeyData.expireDate && authKeyData.expireDate.includes('(무제한)');
                     
@@ -889,15 +733,13 @@
                         expireText = '<strong>구독중</strong>';
                         expireClass = 'subscription-active';
                     } else {
-                        // 현재 날짜와 만료일 비교
                         const today = new Date();
-                        today.setHours(0, 0, 0, 0); // 시간 초기화
+                        today.setHours(0, 0, 0, 0);
                         
                         let expireDate = null;
                         if (authKeyData.expireDate) {
-                            // 만료일 파싱
                             if (authKeyData.expireDate.includes('-')) {
-                                expireDate = new Date(authKeyData.expireDate.split(' ')[0]); // "2025-05-18 (만료됨)" 에서 날짜 부분만
+                                expireDate = new Date(authKeyData.expireDate.split(' ')[0]);
                             } else {
                                 expireDate = new Date(authKeyData.expireDate);
                             }
@@ -905,20 +747,16 @@
                         
                         if (expireDate && !isNaN(expireDate.getTime())) {
                             if (expireDate < today) {
-                                // 만료됨
                                 expireText = '<strong>만료됨</strong>';
                                 expireClass = 'subscription-expired';
                             } else {
-                                // 아직 유효
                                 expireText = formatDate(authKeyData.expireDate);
                             }
                         } else {
-                            // 날짜 파싱 실패시 원본 표시
                             expireText = authKeyData.expireDate;
                         }
                     }
                     
-                    // 구분 처리
                     let sourceText = authKeyData.source;
                     if (authKeyData.source === '유료완료') {
                         sourceText = '유료결제';
@@ -990,15 +828,12 @@
             resultSection.style.display = 'block';
         }
         
-        // 인증키 복사 (여러 인증키 지원)
         function copyAuthKey(authKey = null) {
             let authKeyText;
             
             if (authKey) {
-                // 파라미터로 전달된 인증키 사용
                 authKeyText = authKey;
             } else {
-                // 기존 방식 (단일 인증키)
                 const authKeyElement = document.getElementById('authKeyDisplay0') || document.getElementById('authKeyDisplay');
                 if (!authKeyElement) return;
                 authKeyText = authKeyElement.textContent.trim();
@@ -1009,7 +844,6 @@
                     showMessage('인증키가 클립보드에 복사되었습니다!', 'success');
                 });
             } else {
-                // 구버전 브라우저 지원
                 const textArea = document.createElement('textarea');
                 textArea.value = authKeyText;
                 document.body.appendChild(textArea);
@@ -1020,18 +854,15 @@
             }
         }
         
-        // 메시지 표시
         function showMessage(text, type) {
             const messageEl = document.getElementById('message');
             messageEl.textContent = text;
             messageEl.className = `message ${type}`;
             messageEl.style.display = 'block';
             
-            // 3초 후 자동 숨김
             setTimeout(hideMessage, 3000);
         }
         
-        // 메시지 숨기기
         function hideMessage() {
             const messageEl = document.getElementById('message');
             if (messageEl) {
@@ -1039,13 +870,11 @@
             }
         }
         
-        // 폼 리셋
         function resetForm() {
             document.getElementById('searchForm').style.display = 'block';
             document.getElementById('loading').style.display = 'none';
             document.getElementById('resultSection').style.display = 'none';
             
-            // 체크박스와 입력 필드 초기화
             const timeCheckbox = document.getElementById('timeCheck');
             const nameInput = document.getElementById('name');
             const phoneInput = document.getElementById('phone');
@@ -1054,24 +883,19 @@
             if (nameInput) nameInput.value = '';
             if (phoneInput) phoneInput.value = '';
             
-            // 비활성화 상태로 복원
             toggleFormElements();
             hideMessage();
         }
         
-        // 이벤트 리스너 설정
         function setupEventListeners() {
             const timeCheckbox = document.getElementById('timeCheck');
             if (timeCheckbox) {
                 timeCheckbox.addEventListener('change', toggleFormElements);
-                console.log('체크박스 이벤트 리스너 설정됨');
             }
             
-            // 전화번호 포맷팅 설정
             setupPhoneFormatting();
         }
         
-        // 엔터키 지원
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 if (document.getElementById('searchForm').style.display !== 'none') {
@@ -1085,11 +909,9 @@
             }
         });
         
-        // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('페이지 로드됨');
             setupEventListeners();
-            toggleFormElements(); // 초기 상태를 비활성화로 설정
+            toggleFormElements();
         });
     </script>
 </body>
