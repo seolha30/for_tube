@@ -1,6 +1,6 @@
 const ytdl = require('ytdl-core');
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // CORS 헤더 설정
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -69,4 +69,4 @@ export default async function handler(req, res) {
       message: error.message 
     });
   }
-}
+};
