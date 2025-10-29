@@ -719,7 +719,25 @@
                     return `<strong>${year}-${month}-${day}</strong>`;
                 }
                 
-                let resultHTML = `<h4>✅ ${authKeyDataArray[0].name}님의 인증키입니다</h4>`;
+                let resultHTML = `
+                    <!-- 유튜브 썸네일 (클릭시 새창으로 영상 열림) -->
+                    <div style="margin-bottom: 20px;">
+                        <a href="https://youtu.be/_U0ZlWsQC2w" target="_blank" style="display: block; text-decoration: none;">
+                            <img src="https://raw.githubusercontent.com/seolha30/Tubelens/refs/heads/main/instruction.png" 
+                                alt="유튜브 영상 보기" 
+                                style="width: 100%; max-width: 560px; border-radius: 10px; margin: 0 auto; display: block; cursor: pointer; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.02)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                        </a>
+                    </div>
+                    
+                    <!-- 영상 시청 안내 -->
+                    <p style="text-align: center; font-size: 1.1em; font-weight: bold; color: #d32f2f; margin: 15px 0 25px 0;">
+                        ▲ 반드시 위 영상을 시청해주세요! ▲
+                    </p>
+                    
+                    <h4>✅ ${authKeyDataArray[0].name}님의 인증키입니다</h4>
+                `;
                 
                 if (authKeyDataArray.length > 1) {
                     resultHTML += `<p style="color: #666; margin-bottom: 20px;">총 <strong>${authKeyDataArray.length}개</strong>의 인증키를 찾았습니다. (최신순)</p>`;
