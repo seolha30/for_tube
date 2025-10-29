@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>튜브렌즈 무료 인증키 찾기</title>
+    <title>튜브렌즈 유료 인증키 찾기</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -65,21 +65,21 @@
         }
         
         .time-check-warning {
-            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
-            border: 2px solid #4caf50;
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #ffc107;
             border-radius: 12px;
             padding: 25px;
             text-align: center;
         }
         
         .time-check-warning h4 {
-            color: #2e7d32;
+            color: #856404;
             margin-bottom: 12px;
             font-size: 18px;
         }
         
         .time-check-warning p {
-            color: #2e7d32;
+            color: #856404;
             margin-bottom: 20px;
             font-size: 16px;
         }
@@ -87,9 +87,9 @@
         .checkbox-container {
             margin-top: 20px;
             padding: 15px;
-            background: #e8f5e8;
+            background: #e3f2fd;
             border-radius: 10px;
-            border: 1px solid #4caf50;
+            border: 1px solid #2196f3;
         }
         
         .checkbox-label {
@@ -99,7 +99,7 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            color: #2e7d32;
+            color: #1976d2;
             padding: 5px;
         }
         
@@ -128,18 +128,18 @@
             height: 15px;
             width: 15px;
             background-color: #fff;
-            border: 2px solid #2e7d32;
+            border: 2px solid #1976d2;
             border-radius: 3px;
             transition: all 0.3s;
         }
         
         .custom-checkbox:hover input ~ .checkmark {
-            background-color: #e8f5e8;
+            background-color: #e3f2fd;
         }
         
         .custom-checkbox input:checked ~ .checkmark {
-            background-color: #2e7d32;
-            border-color: #2e7d32;
+            background-color: #1976d2;
+            border-color: #1976d2;
         }
         
         .checkmark:after {
@@ -189,7 +189,7 @@
         
         .form-group input:focus {
             outline: none;
-            border-color: #43e97b;
+            border-color: #667eea;
         }
         
         .form-group input:disabled {
@@ -200,7 +200,7 @@
         }
         
         .btn {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             padding: 14px 30px;
@@ -224,7 +224,7 @@
         }
         
         .btn.search {
-            background: linear-gradient(135deg, #4caf50 0%, #81c784 100%);
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         }
         
         .btn.reset {
@@ -239,7 +239,7 @@
         
         .loading .spinner {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #43e97b;
+            border-top: 3px solid #667eea;
             border-radius: 50%;
             width: 30px;
             height: 30px;
@@ -321,8 +321,8 @@
             letter-spacing: 3px;
             position: relative;
             overflow: hidden;
-            border: 2px solid #43e97b;
-            box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
+            border: 2px solid #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         
         .auth-key-display::before {
@@ -346,7 +346,7 @@
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
-            border-left: 4px solid #43e97b;
+            border-left: 4px solid #667eea;
         }
         
         .detail-item {
@@ -384,7 +384,7 @@
         }
         
         .auth-key-item h5 {
-            color: #43e97b;
+            color: #667eea;
             font-weight: bold;
             text-align: center;
             margin-bottom: 15px;
@@ -471,28 +471,28 @@
         .usage-info {
             margin-top: 15px;
             padding: 15px;
-            background: #e8f5e8;
-            border: 1px solid #c8e6c9;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
             border-radius: 8px;
             font-size: 14px;
             line-height: 1.5;
         }
         
         .usage-info h5 {
-            color: #2e7d32;
+            color: #856404;
             margin-bottom: 10px;
             font-size: 16px;
         }
         
         .usage-info p {
-            color: #2e7d32;
+            color: #856404;
             margin-bottom: 8px;
         }
         
         .search-tips {
             margin-top: 20px;
             padding: 15px;
-            background: #e8f5e8;
+            background: #e8f4f8;
             border-radius: 8px;
             text-align: center;
         }
@@ -527,7 +527,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔑 튜브렌즈 무료 인증키 찾기</h1>
+            <h1>🔑 튜브렌즈 유료 인증키 찾기</h1>
         </div>
         
         <div class="message" id="message"></div>
@@ -555,8 +555,8 @@
             </div>
             
             <div class="form-group">
-                <label for="email" id="emailLabel">이메일</label>
-                <input type="email" id="email" placeholder="example@gmail.com" disabled>
+                <label for="phone" id="phoneLabel">휴대폰 번호</label>
+                <input type="tel" id="phone" placeholder="010-0000-0000" maxlength="13" disabled>
             </div>
             
             <button class="btn search" onclick="searchAuthKey()" id="searchButton" disabled>🔍 인증키 찾기</button>
@@ -565,8 +565,9 @@
                 <h4>🔍 검색 안내</h4>
                 <ul>
                     <li>인증키 신청 후 <strong>10분이 지나야</strong> 검색 가능합니다</li>
-                    <li>이름은 신청시 입력한 이름과 정확히 일치해야 합니다</li>
-                    <li>이메일은 신청시 사용한 이메일과 정확히 일치해야 합니다</li>
+                    <li>이름은 결제시 입력한 이름과 정확히 일치해야 합니다</li>
+                    <li>전화번호는 뒤 8자리만 일치하면 찾을 수 있습니다</li>
+                    <li>전화번호에 하이픈(-)이 있어도 자동으로 처리됩니다</li>
                 </ul>
             </div>
         </div>
@@ -582,138 +583,133 @@
     </div>
 
     <script>
+        // Google Apps Script 배포 URL
+        const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycby-fQmIj_2jovtXGD488uOyP1EzVaPaXhXXgzwyFVK48FXvpJoFcdqXfzVaX_nlt7qe2A/exec';
+        
+        // 전화번호 자동 포맷팅
+        function setupPhoneFormatting() {
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/[^0-9]/g, '');
+                    if (value.length <= 11) {
+                        if (value.length > 6) {
+                            value = value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+                        } else if (value.length > 3) {
+                            value = value.replace(/(\d{3})(\d{4})/, '$1-$2');
+                        }
+                    }
+                    e.target.value = value;
+                });
+            }
+        }
+        
         // 시간 체크 활성화/비활성화
         function toggleFormElements() {
             const timeCheckbox = document.getElementById('timeCheck');
             const nameInput = document.getElementById('name');
-            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
             const searchButton = document.getElementById('searchButton');
             const nameLabel = document.getElementById('nameLabel');
-            const emailLabel = document.getElementById('emailLabel');
+            const phoneLabel = document.getElementById('phoneLabel');
             
-            if (!timeCheckbox || !nameInput || !emailInput || !searchButton) {
+            if (!timeCheckbox || !nameInput || !phoneInput || !searchButton) {
+                console.error('필수 요소들을 찾을 수 없습니다');
                 return;
             }
             
             const isChecked = timeCheckbox.checked;
             
             if (isChecked) {
-                // 활성화
                 nameInput.disabled = false;
-                emailInput.disabled = false;
+                phoneInput.disabled = false;
                 searchButton.disabled = false;
                 
                 if (nameLabel) nameLabel.classList.remove('disabled');
-                if (emailLabel) emailLabel.classList.remove('disabled');
+                if (phoneLabel) phoneLabel.classList.remove('disabled');
                 
-                // 체크 후 이름 입력란에 포커스
                 setTimeout(() => nameInput.focus(), 100);
             } else {
-                // 비활성화
                 nameInput.disabled = true;
-                emailInput.disabled = true;
+                phoneInput.disabled = true;
                 searchButton.disabled = true;
                 
                 if (nameLabel) nameLabel.classList.add('disabled');
-                if (emailLabel) emailLabel.classList.add('disabled');
+                if (phoneLabel) phoneLabel.classList.add('disabled');
                 
-                // 입력값 초기화
                 nameInput.value = '';
-                emailInput.value = '';
+                phoneInput.value = '';
             }
         }
         
-        // 인증키 검색 확인
-        function searchAuthKey() {
+        // 인증키 검색 (보안 버전)
+        async function searchAuthKey() {
             const timeCheckbox = document.getElementById('timeCheck');
             const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
+            const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
             
-            // 시간 체크 확인
             if (!timeCheckbox.checked) {
                 showMessage('먼저 10분 경과 여부를 확인해주세요.', 'error');
                 return;
             }
             
-            // 입력 검증
             if (!name || name.length < 2) {
                 showMessage('이름을 올바르게 입력해주세요. (2글자 이상)', 'error');
                 return;
             }
             
-            if (!email) {
-                showMessage('이메일을 올바르게 입력해주세요.', 'error');
+            if (!phoneInput || phoneInput.length < 8) {
+                showMessage('전화번호를 올바르게 입력해주세요. (최소 8자리)', 'error');
                 return;
             }
             
-            // 바로 로딩 표시하고 검색 시작
             document.getElementById('searchForm').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
             hideMessage();
             
-            // 실제 검색 로직
-            setTimeout(function() {
-                performSearch(name, email);
-            }, 2000);
-        }
-        
-        // 실제 검색 함수 (Google Apps Script API 사용)
-        async function performSearch(name, email) {
             try {
-                const API_URL = 'https://script.google.com/macros/s/AKfycby-fQmIj_2jovtXGD488uOyP1EzVaPaXhXXgzwyFVK48FXvpJoFcdqXfzVaX_nlt7qe2A/exec';
-                const response = await fetch(`${API_URL}?action=findFreeAuthKey&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`);
+                const phoneLastDigits = phoneInput.slice(-8);
+                const response = await fetch(`${API_ENDPOINT}?action=findAuthKey&name=${encodeURIComponent(name)}&phone=${phoneLastDigits}`);
+                
+                if (!response.ok) {
+                    throw new Error('서버 응답 오류');
+                }
                 
                 const data = await response.json();
                 
-                // 로딩 숨기기
                 document.getElementById('loading').style.display = 'none';
                 
                 if (data.success && data.authKeys && data.authKeys.length > 0) {
                     showSearchResult(true, '인증키를 찾았습니다!', data.authKeys);
                 } else {
-                    showSearchResult(false, '일치하는 정보를 찾을 수 없습니다.');
+                    showSearchResult(false, data.message || '일치하는 정보를 찾을 수 없습니다.');
                 }
                 
             } catch (error) {
+                console.error('검색 오류:', error);
                 document.getElementById('loading').style.display = 'none';
                 showSearchResult(false, '검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
             }
         }
         
-
-        
-        // 검색 결과 표시 (여러 결과 지원)
+        // 검색 결과 표시 (기존과 동일)
         function showSearchResult(success, message, authKeyDataArray = null) {
             const resultSection = document.getElementById('resultSection');
             resultSection.className = 'result-section ' + (success ? 'success' : 'error');
             
             if (success && authKeyDataArray && authKeyDataArray.length > 0) {
-                // 발급일 기준으로 최신순 정렬 (내림차순)
                 authKeyDataArray.sort((a, b) => {
                     const dateA = new Date(a.issueDate);
                     const dateB = new Date(b.issueDate);
-                    return dateB - dateA; // 최신 날짜가 먼저 오도록
+                    return dateB - dateA;
                 });
                 
-                // 날짜 포맷팅 함수
                 function formatDate(dateString) {
                     if (!dateString) return '-';
                     
-                    // 다양한 날짜 형식 처리
-                    let date;
-                    if (dateString.includes('/')) {
-                        // MM/DD/YYYY 또는 YYYY/MM/DD 형식
-                        date = new Date(dateString);
-                    } else if (dateString.includes('-')) {
-                        // YYYY-MM-DD 형식
-                        date = new Date(dateString);
-                    } else {
-                        // 기타 형식
-                        date = new Date(dateString);
-                    }
-                    
+                    let date = new Date(dateString);
                     if (isNaN(date.getTime())) {
-                        return dateString; // 파싱 실패시 원본 반환
+                        return dateString;
                     }
                     
                     const year = date.getFullYear();
@@ -723,15 +719,31 @@
                     return `<strong>${year}-${month}-${day}</strong>`;
                 }
                 
-                let resultHTML = `<h4>✅ ${authKeyDataArray[0].name}님의 인증키입니다</h4>`;
+                let resultHTML = `
+                    <!-- 유튜브 썸네일 (클릭시 새창으로 영상 열림) -->
+                    <div style="margin-bottom: 20px;">
+                        <a href="https://youtu.be/_U0ZlWsQC2w" target="_blank" style="display: block; text-decoration: none;">
+                            <img src="https://raw.githubusercontent.com/seolha30/Tubelens/refs/heads/main/instruction.png" 
+                                alt="유튜브 영상 보기" 
+                                style="width: 100%; max-width: 560px; border-radius: 10px; margin: 0 auto; display: block; cursor: pointer; transition: transform 0.2s;"
+                                onmouseover="this.style.transform='scale(1.02)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                        </a>
+                    </div>
+                    
+                    <!-- 영상 시청 안내 -->
+                    <p style="text-align: center; font-size: 1.1em; font-weight: bold; color: #d32f2f; margin: 15px 0 25px 0;">
+                        ▲ 반드시 위 영상을 시청해주세요! ▲
+                    </p>
+                    
+                    <h4>✅ ${authKeyDataArray[0].name}님의 인증키입니다</h4>
+                `;
                 
                 if (authKeyDataArray.length > 1) {
                     resultHTML += `<p style="color: #666; margin-bottom: 20px;">총 <strong>${authKeyDataArray.length}개</strong>의 인증키를 찾았습니다. (최신순)</p>`;
                 }
                 
-                // 각 인증키별로 표시
                 authKeyDataArray.forEach((authKeyData, index) => {
-                    // 만료일 처리
                     let expireText, expireClass = '';
                     const isUnlimited = authKeyData.expireDate && authKeyData.expireDate.includes('(무제한)');
                     
@@ -739,15 +751,13 @@
                         expireText = '<strong>구독중</strong>';
                         expireClass = 'subscription-active';
                     } else {
-                        // 현재 날짜와 만료일 비교
                         const today = new Date();
-                        today.setHours(0, 0, 0, 0); // 시간 초기화
+                        today.setHours(0, 0, 0, 0);
                         
                         let expireDate = null;
                         if (authKeyData.expireDate) {
-                            // 만료일 파싱
                             if (authKeyData.expireDate.includes('-')) {
-                                expireDate = new Date(authKeyData.expireDate.split(' ')[0]); // "2025-05-18 (만료됨)" 에서 날짜 부분만
+                                expireDate = new Date(authKeyData.expireDate.split(' ')[0]);
                             } else {
                                 expireDate = new Date(authKeyData.expireDate);
                             }
@@ -755,27 +765,28 @@
                         
                         if (expireDate && !isNaN(expireDate.getTime())) {
                             if (expireDate < today) {
-                                // 만료됨
                                 expireText = '<strong>만료됨</strong>';
                                 expireClass = 'subscription-expired';
                             } else {
-                                // 아직 유효
                                 expireText = formatDate(authKeyData.expireDate);
                             }
                         } else {
-                            // 날짜 파싱 실패시 원본 표시
                             expireText = authKeyData.expireDate;
                         }
                     }
                     
-                    // 구분 처리
-                    let sourceText = '무료';
+                    let sourceText = authKeyData.source;
+                    if (authKeyData.source === '유료완료') {
+                        sourceText = '유료결제';
+                    } else if (authKeyData.source === '정기결제') {
+                        sourceText = '정기결제';
+                    }
                     
                     const keyNumber = authKeyDataArray.length > 1 ? ` #${index + 1}` : '';
                     
                     resultHTML += `
                         <div class="auth-key-item" style="margin-bottom: 30px; ${index > 0 ? 'border-top: 2px solid #eee; padding-top: 20px;' : ''}">
-                            ${keyNumber ? `<h5 style="color: #43e97b; margin-bottom: 15px;">인증키${keyNumber} ${index === 0 ? '<span style="color: #28a745; font-size: 14px;">(최신)</span>' : ''}</h5>` : ''}
+                            ${keyNumber ? `<h5 style="color: #667eea; margin-bottom: 15px;">인증키${keyNumber} ${index === 0 ? '<span style="color: #28a745; font-size: 14px;">(최신)</span>' : ''}</h5>` : ''}
                             
                             <div class="auth-key-display" id="authKeyDisplay${index}" style="${expireClass === 'subscription-expired' ? 'opacity: 0.6; filter: grayscale(50%);' : ''}">
                                 ${authKeyData.authKey}
@@ -823,9 +834,9 @@
                     <div class="error-details">
                         <p><strong>다음 사항을 확인해주세요:</strong></p>
                         <ul>
-                            <li>신청 시 입력한 이름과 일치하는지 확인</li>
-                            <li>신청 시 사용한 이메일과 정확히 일치하는지 확인</li>
-                            <li>무료 인증키 신청한지 10분이 지났는지 확인</li>
+                            <li>결제 시 입력한 이름과 일치하는지 확인</li>
+                            <li>전화번호가 올바른지 확인 (하이픈은 상관없습니다)</li>
+                            <li>유료 사용자가 맞는지 확인</li>
                         </ul>
                     </div>
                     <button class="btn" onclick="resetForm()">🔍 다시 검색하기</button>
@@ -835,15 +846,12 @@
             resultSection.style.display = 'block';
         }
         
-        // 인증키 복사 (여러 인증키 지원)
         function copyAuthKey(authKey = null) {
             let authKeyText;
             
             if (authKey) {
-                // 파라미터로 전달된 인증키 사용
                 authKeyText = authKey;
             } else {
-                // 기존 방식 (단일 인증키)
                 const authKeyElement = document.getElementById('authKeyDisplay0') || document.getElementById('authKeyDisplay');
                 if (!authKeyElement) return;
                 authKeyText = authKeyElement.textContent.trim();
@@ -854,7 +862,6 @@
                     showMessage('인증키가 클립보드에 복사되었습니다!', 'success');
                 });
             } else {
-                // 구버전 브라우저 지원
                 const textArea = document.createElement('textarea');
                 textArea.value = authKeyText;
                 document.body.appendChild(textArea);
@@ -865,18 +872,15 @@
             }
         }
         
-        // 메시지 표시
         function showMessage(text, type) {
             const messageEl = document.getElementById('message');
             messageEl.textContent = text;
             messageEl.className = `message ${type}`;
             messageEl.style.display = 'block';
             
-            // 3초 후 자동 숨김
             setTimeout(hideMessage, 3000);
         }
         
-        // 메시지 숨기기
         function hideMessage() {
             const messageEl = document.getElementById('message');
             if (messageEl) {
@@ -884,35 +888,32 @@
             }
         }
         
-        // 폼 리셋
         function resetForm() {
             document.getElementById('searchForm').style.display = 'block';
             document.getElementById('loading').style.display = 'none';
             document.getElementById('resultSection').style.display = 'none';
             
-            // 체크박스와 입력 필드 초기화
             const timeCheckbox = document.getElementById('timeCheck');
             const nameInput = document.getElementById('name');
-            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
             
             if (timeCheckbox) timeCheckbox.checked = false;
             if (nameInput) nameInput.value = '';
-            if (emailInput) emailInput.value = '';
+            if (phoneInput) phoneInput.value = '';
             
-            // 비활성화 상태로 복원
             toggleFormElements();
             hideMessage();
         }
         
-        // 이벤트 리스너 설정
         function setupEventListeners() {
             const timeCheckbox = document.getElementById('timeCheck');
             if (timeCheckbox) {
                 timeCheckbox.addEventListener('change', toggleFormElements);
             }
+            
+            setupPhoneFormatting();
         }
         
-        // 엔터키 지원
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 if (document.getElementById('searchForm').style.display !== 'none') {
@@ -926,10 +927,9 @@
             }
         });
         
-        // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
-            toggleFormElements(); // 초기 상태를 비활성화로 설정
+            toggleFormElements();
         });
     </script>
 </body>
