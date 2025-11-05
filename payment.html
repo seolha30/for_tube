@@ -221,7 +221,7 @@
         
         .loading {
             text-align: center;
-            padding: 20px;
+            padding: 10px 20px;
             display: none;
         }
         
@@ -442,17 +442,16 @@
         </div>
         
         <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>결제창을 준비하고 있습니다...</p>
+            <p style="font-size: 18px; font-weight: bold; margin-bottom: 20px;">결제창에서 결제를 진행해주세요</p>
+            <div style="background: #fff9c4; padding: 20px; border-radius: 8px; margin-top: 10px;">
+                <p style="font-size: 16px; margin-bottom: 5px;">⏰ 팝업이 뜨면 잠시만 기다려주세요 <span style="color: red; font-weight: bold;">(1~10초)</span></p>
+                <p style="font-size: 16px; margin-bottom: 5px;">결제 완료 후 <a href="https://tubelens.kr" target="_blank" style="color: #667eea; font-weight: bold; text-decoration: underline;">tubelens.kr</a>에서</p>
+                <p style="font-size: 16px; margin-bottom: 5px;"><span style="color: #000; font-weight: bold;">'인증키 찾기'</span>를 통해</p>
+                <p style="font-size: 16px; margin: 0;">인증키를 확인하실 수 있습니다</p>
+            </div>
         </div>
         
-        <div class="payment-complete" id="paymentComplete">
-            <div class="success-icon">✅</div>
-            <h2>결제가 완료되었습니다!</h2>
-            <p>인증키가 이메일로 발송됩니다.</p>
-            <p>이메일을 확인해주세요.</p>
-            <button class="btn" onclick="location.reload()">새로운 구독하기</button>
-        </div>
+        
         
         <div class="subscription-info" id="subscriptionInfo">
             <div class="user-info-confirm" id="userInfoConfirm">
@@ -530,10 +529,7 @@
         // PayApp 콜백 함수들 정의
         function payapp_complete(data) {
             console.log('🎉 결제 완료 콜백 호출:', data);
-            // 로딩 화면 숨기기
-            document.getElementById('loading').style.display = 'none';
-            // 결제 완료 화면 표시
-            document.getElementById('paymentComplete').style.display = 'block';
+            // 로딩 화면 계속 표시 (결제 완료 화면 없음)
         }
         
         function payapp_fail(data) {
@@ -544,15 +540,7 @@
         
         function payapp_close() {
             console.log('🚪 PayApp 창 닫힘 콜백 호출');
-            // 창이 닫혔을 때 로딩 화면 숨기기
-            document.getElementById('loading').style.display = 'none';
-            // 5초 후에도 결제완료 화면이 안보이면 폼으로 돌아가기
-            setTimeout(function() {
-                if (document.getElementById('paymentComplete').style.display !== 'block') {
-                    console.log('⚠️ 결제 상태 불명 - 폼으로 복귀');
-                    resetForm();
-                }
-            }, 5000);
+            // 로딩 화면 계속 표시 (닫지 않음)
         }
         
         // 전화번호 자동 포맷팅
@@ -623,10 +611,8 @@
             document.getElementById('subscriptionInfo').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
             
-            // 잠시 대기 후 PayApp 호출
-            setTimeout(function() {
-                callPayApp(name, phoneInput, email);
-            }, 1000);
+            // 바로 PayApp 호출
+            callPayApp(name, phoneInput, email);
         }
         
         // PayApp 호출
