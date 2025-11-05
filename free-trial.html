@@ -598,7 +598,7 @@
         }
         
         // 신청 시작
-        async function submitApplication() {
+        function submitApplication() {
             const name = document.getElementById('name').value.trim();
             const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
             const email = document.getElementById('email').value.trim();
@@ -614,48 +614,42 @@
             document.getElementById('subscriptionInfo').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
             
-            try {
-                // 기기 식별자 생성
-                const deviceId = generateDeviceId();
-                
-                // 데이터 전송
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: name,
-                        phone: phoneInput,
-                        email: email,
-                        respondentId: deviceId
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // 성공 - 완료 화면 표시
-                    document.getElementById('loading').innerHTML = `
-                        <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
-                        <h2 style="color: #28a745; font-size: 24px; margin-bottom: 20px;">신청이 완료되었습니다!</h2>
-                        <p style="color: #666; font-size: 16px; margin-bottom: 10px;">튜브렌즈 3일 무료 체험을 시작하실 수 있습니다.</p>
-                        <div style="background: #fff9c4; padding: 20px; border-radius: 8px; margin-top: 20px;">
-                            <p style="font-size: 16px; margin-bottom: 5px;">신청 완료 후 <a href="https://tubelens.kr" target="_blank" style="color: #667eea; font-weight: bold; text-decoration: underline;">tubelens.kr</a>에서</p>
-                            <p style="font-size: 16px; margin-bottom: 5px;"><span style="color: #000; font-weight: bold;">'인증키 찾기'</span>를 통해</p>
-                            <p style="font-size: 16px; margin: 0;">인증키를 확인하실 수 있습니다</p>
-                        </div>
-                        <p style="margin-top: 20px; color: #999; font-size: 14px;">이 창을 닫으셔도 됩니다.</p>
-                    `;
-                } else {
-                    // 실패 (중복 등)
-                    showMessage(result.message || '신청 중 오류가 발생했습니다.', 'error');
-                    resetForm();
-                }
-                
-            } catch (error) {
-                console.error('신청 오류:', error);
-                // 에러 발생 시에도 완료 화면 표시 (CORS 에러 등)
+            // 기기 식별자 생성
+            const deviceId = generateDeviceId();
+            
+            // iframe으로 전송
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.name = 'hiddenFrame';
+            document.body.appendChild(iframe);
+            
+            // form 생성
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = WEB_APP_URL;
+            form.target = 'hiddenFrame';
+            
+            // 데이터를 개별 필드로 추가
+            const fields = {
+                name: name,
+                phone: phoneInput,
+                email: email,
+                respondentId: deviceId
+            };
+            
+            for (const [key, value] of Object.entries(fields)) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                form.appendChild(input);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+            
+            // 2초 후 완료 화면
+            setTimeout(() => {
                 document.getElementById('loading').innerHTML = `
                     <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
                     <h2 style="color: #28a745; font-size: 24px; margin-bottom: 20px;">신청이 완료되었습니다!</h2>
@@ -667,7 +661,11 @@
                     </div>
                     <p style="margin-top: 20px; color: #999; font-size: 14px;">이 창을 닫으셔도 됩니다.</p>
                 `;
-            }
+                
+                // 정리
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+            }, 2000);
         }
         
         // 메시지 표시
