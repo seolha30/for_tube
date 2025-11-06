@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -88,7 +88,7 @@
         
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
         
         .header h1 {
@@ -441,6 +441,7 @@
         </div>
         
         <div class="loading" id="loading">
+            <div class="spinner"></div>
             <p style="font-size: 18px; font-weight: bold; margin-bottom: 20px;">신청 처리 중입니다...</p>
             <div style="background: #fff9c4; padding: 20px; border-radius: 8px; margin-top: 10px;">
                 <p style="font-size: 16px; margin-bottom: 5px;">⏰ 잠시만 기다려주세요</p>
@@ -461,22 +462,20 @@
             </div>
             
             <h3>📋 무료 체험 정보</h3>
-            <p><strong>상품명:</strong> 튜브렌즈 3일 무료 체험</p>
             <p class="price">3일 무료</p>
             <p><strong>체험기간:</strong> 신청일로부터 3일간</p>
-            <p><strong>결제:</strong> 무료 체험 종료 후 자동 결제 없음</p>
             
             <div class="features">
                 <h4>🎯 무료 체험</h4>
                 <ul>
-                    <li>3일간 모든 기능 무제한 사용</li>
-                    <li>체험 종료 후 자동 결제 없음 - 안심하세요!</li>
+                    <li>3일간 모든 기능 사용</li>
+                    <li>유료와 동일하게 체험 가능합니다!</li>
                 </ul>
             </div>
             
             <div class="auth-key-info">
                 <h4>📧 인증키 발송 안내</h4>
-                <p><strong>홈페이지 '🔍내 인증키 찾기'에서</strong></p>
+                <p><strong>홈페이지 '🔍인증키 찾기'에서</strong></p>
                 <p><strong>10분 이내에 인증키를 확인 할 수 있습니다.</strong></p>
                 <p><strong>*인증키는 1개의 PC에서 사용가능합니다.*</strong></p>
                 <p>인증키가 메일로도 발송예정입니다.</p>
@@ -545,6 +544,22 @@
             const fingerprintString = JSON.stringify(fingerprint);
             return btoa(fingerprintString).substring(0, 10);
         }
+
+        // IP 주소 가져오기
+        let userIpAddress = 'Unknown';
+        
+        async function getUserIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                userIpAddress = data.ip;
+                return data.ip;
+            } catch (error) {
+                console.log('IP 가져오기 실패:', error);
+                userIpAddress = 'Unknown';
+                return 'Unknown';
+            }
+        }
         
         // 전화번호 자동 포맷팅
         document.getElementById('phone').addEventListener('input', function(e) {
@@ -560,7 +575,7 @@
         });
         
         // 무료 체험 정보 확인
-        function showSubscriptionInfo() {
+        async function showSubscriptionInfo() {
             const name = document.getElementById('name').value.trim();
             const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
             const email = document.getElementById('email').value.trim();
@@ -581,6 +596,9 @@
                 return;
             }
             
+            // IP 주소 가져오기
+            await getUserIP();
+            
             // 사용자 정보 확인란에 표시
             const formattedPhone = phoneInput.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
             document.getElementById('confirmName').textContent = name;
@@ -598,7 +616,7 @@
         }
         
         // 신청 시작
-        function submitApplication() {
+        async function submitApplication() {
             const name = document.getElementById('name').value.trim();
             const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
             const email = document.getElementById('email').value.trim();
@@ -617,55 +635,67 @@
             // 기기 식별자 생성
             const deviceId = generateDeviceId();
             
-            // iframe으로 전송
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.name = 'hiddenFrame';
-            document.body.appendChild(iframe);
+            // FormData 생성
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('phone', phoneInput);
+            formData.append('email', email);
+            formData.append('respondentId', deviceId);
+            formData.append('userip', userIpAddress);
             
-            // form 생성
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = WEB_APP_URL;
-            form.target = 'hiddenFrame';
-            
-            // 데이터를 개별 필드로 추가
-            const fields = {
-                name: name,
-                phone: phoneInput,
-                email: email,
-                respondentId: deviceId
-            };
-            
-            for (const [key, value] of Object.entries(fields)) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = value;
-                form.appendChild(input);
-            }
-            
-            document.body.appendChild(form);
-            form.submit();
-            
-            // 2초 후 완료 화면
-            setTimeout(() => {
-                document.getElementById('loading').innerHTML = `
-                    <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
-                    <h2 style="color: #28a745; font-size: 24px; margin-bottom: 20px;">신청이 완료되었습니다!</h2>
-                    <p style="color: #666; font-size: 16px; margin-bottom: 10px;">튜브렌즈 3일 무료 체험을 시작하실 수 있습니다.</p>
-                    <div style="background: #fff9c4; padding: 20px; border-radius: 8px; margin-top: 20px;">
-                        <p style="font-size: 16px; margin-bottom: 5px;">신청 완료 후 <a href="https://tubelens.kr" target="_blank" style="color: #667eea; font-weight: bold; text-decoration: underline;">tubelens.kr</a>에서</p>
-                        <p style="font-size: 16px; margin-bottom: 5px;"><span style="color: #000; font-weight: bold;">'인증키 찾기'</span>를 통해</p>
-                        <p style="font-size: 16px; margin: 0;">인증키를 확인하실 수 있습니다</p>
-                    </div>
-                    <p style="margin-top: 20px; color: #999; font-size: 14px;">이 창을 닫으셔도 됩니다.</p>
-                `;
+            try {
+                // fetch로 전송
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData,
+                    redirect: 'follow'
+                });
                 
-                // 정리
-                document.body.removeChild(form);
-                document.body.removeChild(iframe);
-            }, 2000);
+                const result = await response.json();
+                
+                // 응답 확인
+                if (result.success) {
+                    // 성공
+                    document.getElementById('loading').innerHTML = `
+                        <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
+                        <h2 style="color: #28a745; font-size: 24px; margin-bottom: 20px;">신청이 완료되었습니다!</h2>
+                        <p style="color: #666; font-size: 16px; margin-bottom: 10px;">튜브렌즈 3일 무료 체험을 시작하실 수 있습니다.</p>
+                        <div style="background: #fff9c4; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                            <p style="font-size: 16px; margin-bottom: 5px;">⏰ 신청 완료 후 <span style="color: #000; font-weight: bold;">'10분 이내'</span>에</p>
+                            <p style="font-size: 16px; margin-bottom: 5px;"><a href="https://tubelens.kr" target="_blank" style="color: #667eea; font-weight: bold; text-decoration: underline;">tubelens.kr</a>에서 <span style="color: #000; font-weight: bold;">'인증키 찾기'</span>를 통해</p>
+                            <p style="font-size: 16px; margin: 0;">인증키를 확인하실 수 있습니다</p>
+                        </div>
+                        <p style="margin-top: 20px; color: #999; font-size: 14px;">이 창을 닫으셔도 됩니다.</p>
+                    `;
+                } else {
+                    // 실패 (중복 등)
+                    document.getElementById('loading').innerHTML = `
+                        <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+                        <h2 style="color: #ff6b6b; font-size: 24px; margin-bottom: 20px;">${result.message}</h2>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px;">
+                            <a href="https://www.tubelens.kr/pricing" style="text-decoration: none;">
+                                <button style="width: 100%; padding: 16px 20px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    💎 구독제 신청하기 💎
+                                </button>
+                            </a>
+                            <button onclick="resetForm()" style="width: 100%; padding: 16px 20px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s; background: #6c757d; color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                                ← 돌아가기
+                            </button>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                // 에러 발생
+                console.error('전송 실패:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div style="font-size: 64px; margin-bottom: 20px;">❌</div>
+                    <h2 style="color: #ff6b6b; font-size: 24px; margin-bottom: 20px;">오류가 발생했습니다</h2>
+                    <p style="color: #666; font-size: 16px; margin-bottom: 10px;">잠시 후 다시 시도해주세요.</p>
+                    <button class="btn" onclick="resetForm()" style="margin-top: 20px; background: #6c757d;">
+                        ← 다시 시도하기
+                    </button>
+                `;
+            }
         }
         
         // 메시지 표시
