@@ -525,24 +525,12 @@
         // 기기 식별자 생성
         // ============================================
         function generateDeviceId() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.textBaseline = 'top';
-            ctx.font = '14px Arial';
-            ctx.fillText('fingerprint', 2, 2);
-            const canvasData = canvas.toDataURL();
-            
-            const fingerprint = {
-                userAgent: navigator.userAgent,
-                language: navigator.language,
-                platform: navigator.platform,
-                screenResolution: `${screen.width}x${screen.height}`,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                canvasFingerprint: canvasData.substring(0, 50)
-            };
-            
-            const fingerprintString = JSON.stringify(fingerprint);
-            return btoa(fingerprintString).substring(0, 10);
+            let deviceId = localStorage.getItem('tubelens_device');
+            if (!deviceId) {
+                deviceId = 'TB_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('tubelens_device', deviceId);
+            }
+            return deviceId;
         }
 
         // IP 주소 가져오기
