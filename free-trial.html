@@ -633,11 +633,21 @@
             
             try {
                 // fetch로 전송
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: formData,
-                    redirect: 'follow'
-                });
+                // 3번까지 재시도
+                let response;
+                for (let i = 0; i < 3; i++) {
+                    try {
+                        response = await fetch(WEB_APP_URL, {
+                            method: 'POST',
+                            body: formData,
+                            redirect: 'follow'
+                        });
+                        break; // 성공하면 반복 중단
+                    } catch (error) {
+                        if (i === 2) throw error; // 마지막 시도면 에러 던지기
+                        await new Promise(r => setTimeout(r, 1000)); // 1초 대기
+                    }
+                }
                 
                 const result = await response.json();
                 
