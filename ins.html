@@ -182,6 +182,7 @@ tbody td {
 .chip-make { background: #E8F5E9; color: #2E7D32; }
 .chip-free { background: #FFFDE7; color: #F57F17; }
 .chip-paid { background: #E3F2FD; color: #0D47A1; }
+.chip-cancel { background: #FFEBEE; color: #C62828; }
 
 /* Key cell */
 .key-cell {
@@ -750,7 +751,7 @@ function renderTable(data) {
     const isDEmail   = isDupEmail(d);
     const isDContact = isDupContact(d);
     const prodChip  = d.product === '튜브렌즈' ? 'chip-tube' : 'chip-make';
-    const typeChip  = (d.type || '').includes('무료') ? 'chip-free' : 'chip-paid';
+    const typeChip  = (d.type || '').includes('해지') ? 'chip-cancel' : (d.type || '').includes('무료') ? 'chip-free' : 'chip-paid';
     const keyId     = `key-${idx}`;
 
     body += `<tr>
@@ -778,7 +779,7 @@ function renderCards(data) {
     const isDContact = isDupContact(d);
     const borderCls  = d.product === '튜브렌즈' ? 'tube' : 'make';
     const prodChip   = d.product === '튜브렌즈' ? 'chip-tube' : 'chip-make';
-    const typeChip   = (d.type || '').includes('무료') ? 'chip-free' : 'chip-paid';
+    const typeChip   = (d.type || '').includes('해지') ? 'chip-cancel' : (d.type || '').includes('무료') ? 'chip-free' : 'chip-paid';
     const cardId     = `card-key-${idx}`;
 
     html += `
