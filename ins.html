@@ -201,6 +201,7 @@ tbody td {
 /* Row highlights */
 .cell-expired { background: #FFEBEE !important; }
 .cell-dup { background: #FFCDD2 !important; color: #B71C1C !important; font-weight: 700; }
+.row-cancel td { background: #FFEBEE !important; }
 
 /* ===== CARDS (MOBILE) ===== */
 .cards { display: none; flex-direction: column; gap: 10px; }
@@ -214,6 +215,7 @@ tbody td {
 }
 .card.tube { border-left-color: #C62828; }
 .card.make { border-left-color: #2E7D32; }
+.card.cancel { background: #FFEBEE; border-left-color: #C62828; }
 
 .card-top {
   padding: 10px 14px 9px;
@@ -754,7 +756,8 @@ function renderTable(data) {
     const typeChip  = (d.type || '').includes('해지') ? 'chip-cancel' : (d.type || '').includes('무료') ? 'chip-free' : 'chip-paid';
     const keyId     = `key-${idx}`;
 
-    body += `<tr>
+    const isCancel = (d.type || '').includes('해지');
+    body += `<tr class="${isCancel ? 'row-cancel' : ''}">
       <td class="td-n">${idx + 1}</td>
       <td><span class="chip ${prodChip}">${esc(d.product)}</span></td>
       <td>${esc(d.item)}</td>
@@ -782,8 +785,9 @@ function renderCards(data) {
     const typeChip   = (d.type || '').includes('해지') ? 'chip-cancel' : (d.type || '').includes('무료') ? 'chip-free' : 'chip-paid';
     const cardId     = `card-key-${idx}`;
 
+    const isCancel   = (d.type || '').includes('해지');
     html += `
-    <div class="card ${borderCls}">
+    <div class="card ${borderCls}${isCancel ? ' cancel' : ''}">
       <div class="card-top">
         <div>
           <div class="card-meta">#${idx + 1} &nbsp;·&nbsp; ${esc(d.item)}</div>
