@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#3F51B5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>🔎 Seol License Viewer</title>
+<!--
+  GitHub Pages 배포 방법:
+  1. 이 파일을 GitHub 저장소에 push
+  2. Settings > Pages > Branch: main, Folder: / 선택 후 Save
+  3. https://[username].github.io/[repo-name]/webversion/ 으로 접속
+-->
+<style>
+/* ===== RESET & VARIABLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #3F51B5;
+  --primary-hover: #303F9F;
+  --green: #2E7D32;
+  --green-hover: #1B5E20;
+  --border: #e0e0e0;
+  --bg: #f0f2f5;
+  --shadow: 0 1px 4px rgba(0,0,0,0.1);
+  --radius: 10px;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', Arial, sans-serif;
+  background: var(--bg);
+  color: #212121;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: var(--primary);
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+.header h1 { font-size: 17px; font-weight: 700; }
+.header-btn {
+  background: rgba(255,255,255,0.18);
+  border: none;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.header-btn:hover, .header-btn:active { background: rgba(255,255,255,0.3); }
+
+/* ===== CONTAINER ===== */
+.container { max-width: 1440px; margin: 0 auto; padding: 14px; }
+
+/* ===== STATS ===== */
+.stats {
+  background: white;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  min-height: 52px;
+}
+.stats-main { font-weight: 700; color: var(--primary); font-size: 14px; margin-bottom: 3px; }
+.stats-detail { color: #616161; font-size: 12px; line-height: 1.5; }
+.stats-loading { color: #FF9800; font-weight: 600; font-size: 13px; }
+.stats-error { color: #C62828; font-size: 13px; line-height: 1.6; }
+
+/* ===== CONTROLS ===== */
+.controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.controls select, .controls input[type=search] {
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  background: white;
+  color: #212121;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  min-height: 44px;
+}
+.controls select:focus, .controls input[type=search]:focus { border-color: var(--primary); }
+.controls select { min-width: 170px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+.controls input[type=search] { flex: 1; min-width: 200px; }
+
+/* ===== ACTION BUTTONS ===== */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-blue { background: var(--primary); color: white; }
+.btn-blue:hover, .btn-blue:active { background: var(--primary-hover); }
+.btn-green { background: var(--green); color: white; }
+.btn-green:hover, .btn-green:active { background: var(--green-hover); }
+.btn-gray { background: #f5f5f5; color: #333; border: 1.5px solid var(--border); }
+.btn-gray:hover, .btn-gray:active { background: #ebebeb; }
+
+/* ===== RESULT COUNT ===== */
+.result-count { font-size: 12px; color: #757575; margin-bottom: 8px; padding: 0 2px; min-height: 18px; }
+
+/* ===== TABLE (DESKTOP) ===== */
+.table-wrap {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead th {
+  background: #4a9eff;
+  color: white;
+  padding: 10px 7px;
+  text-align: center;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  position: sticky;
+  top: 0;
+}
+thead th:hover { background: #3a8ee0; }
+thead th.sort-asc::after { content: ' ▲'; font-size: 10px; }
+thead th.sort-desc::after { content: ' ▼'; font-size: 10px; }
+.th-n { cursor: default !important; width: 44px; }
+tbody tr:nth-child(even) { background: #fafafa; }
+tbody tr:hover { background: #f0f4ff; }
+tbody td {
+  padding: 8px 7px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+.td-n { color: #9e9e9e; font-size: 11px; }
+
+/* Chips */
+.chip {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.chip-tube { background: #FFF0F0; color: #C62828; }
+.chip-make { background: #E8F5E9; color: #2E7D32; }
+.chip-free { background: #FFFDE7; color: #F57F17; }
+.chip-paid { background: #E3F2FD; color: #0D47A1; }
+
+/* Key cell */
+.key-cell {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: background 0.15s;
+  display: inline-block;
+}
+.key-cell:hover { background: #e3f2fd; }
+.key-cell.copied { background: #c8e6c9 !important; }
+
+/* Row highlights */
+.cell-expired { background: #FFEBEE !important; }
+.cell-dup { background: #FFCDD2 !important; color: #B71C1C !important; font-weight: 700; }
+
+/* ===== CARDS (MOBILE) ===== */
+.cards { display: none; flex-direction: column; gap: 10px; }
+
+.card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  border-left: 4px solid #9e9e9e;
+}
+.card.tube { border-left-color: #C62828; }
+.card.make { border-left-color: #2E7D32; }
+
+.card-top {
+  padding: 10px 14px 9px;
+  border-bottom: 1px solid #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.card-meta { font-size: 10px; color: #9e9e9e; margin-bottom: 2px; }
+.card-user { font-size: 15px; font-weight: 700; color: #212121; word-break: break-all; }
+.card-badges { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0; }
+
+.card-body {
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+.card-field { display: flex; flex-direction: column; gap: 2px; }
+.card-label { font-size: 10px; color: #9e9e9e; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.card-val { font-size: 13px; color: #212121; word-break: break-word; line-height: 1.4; }
+.card-val.dup-val { color: #B71C1C; font-weight: 700; }
+.card-val.expired-val { color: #C62828; font-weight: 700; }
+.card-full { grid-column: 1 / -1; }
+
+.card-key-row { padding: 0 14px 12px; }
+.card-key-box {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  gap: 8px;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.card-key-box:active { background: #c8e6c9; }
+.card-key-box.copied { background: #c8e6c9; }
+.card-key-text {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  flex: 1;
+  letter-spacing: 0.5px;
+  word-break: break-all;
+}
+.card-key-hint { font-size: 11px; color: #9e9e9e; white-space: nowrap; }
+
+/* ===== EMPTY STATE ===== */
+.empty {
+  text-align: center;
+  padding: 52px 20px;
+  color: #9e9e9e;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: none;
+}
+.empty-icon { font-size: 44px; margin-bottom: 10px; }
+.empty-text { font-size: 15px; }
+
+/* ===== LOADING OVERLAY ===== */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.88);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+}
+.overlay.on { display: flex; }
+.spinner {
+  width: 44px; height: 44px;
+  border: 4px solid #e0e0e0;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.overlay-msg { font-size: 14px; font-weight: 600; color: var(--primary); text-align: center; max-width: 260px; }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(33,33,33,0.92);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: transform 0.25s ease;
+  z-index: 1000;
+  pointer-events: none;
+  max-width: 90vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .container { padding: 10px; }
+  .header { padding: 12px 14px; }
+  .header h1 { font-size: 15px; }
+  .controls { gap: 7px; }
+  .controls select { min-width: 0; flex: 1; }
+  .table-wrap { display: none; }
+  .cards { display: flex; }
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+  .actions .btn { justify-content: center; font-size: 12px; padding: 10px 6px; }
+}
+@media (min-width: 769px) {
+  .cards { display: none !important; }
+  .table-wrap { display: block; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-msg" id="overlayMsg">데이터 로딩 중...</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Header -->
+<header class="header">
+  <h1>🔎 Seol License Viewer</h1>
+  <button class="header-btn" onclick="loadAll()">🔄 새로고침</button>
+</header>
+
+<div class="container">
+  <!-- Stats -->
+  <div class="stats" id="stats">
+    <span class="stats-loading">데이터 로딩 중...</span>
+  </div>
+
+  <!-- Filters -->
+  <div class="controls">
+    <select id="sheetFilter" onchange="render()">
+      <option value="">전체</option>
+      <optgroup label="── 튜브렌즈 ──">
+        <option value="튜브렌즈_3일무료">튜브렌즈 · 3일무료</option>
+        <option value="튜브렌즈_30일무료">튜브렌즈 · 30일무료</option>
+        <option value="튜브렌즈_유료">튜브렌즈 · 유료</option>
+        <option value="튜브렌즈_정기결제">튜브렌즈 · 정기결제</option>
+      </optgroup>
+      <optgroup label="── 메이크렌즈 ──">
+        <option value="메이크렌즈_3일무료">메이크렌즈 · 3일무료</option>
+        <option value="메이크렌즈_정기결제">메이크렌즈 · 정기결제</option>
+      </optgroup>
+    </select>
+    <input type="search" id="searchInput"
+      placeholder="이메일 · 사용자 정보 · 라이센스키 · 연락처 검색"
+      oninput="render()">
+  </div>
+
+  <!-- Action buttons -->
+  <div class="actions">
+    <button class="btn btn-blue" onclick="openSheet('tube')">📊 튜브렌즈 시트</button>
+    <button class="btn btn-green" onclick="openSheet('make')">📊 메이크렌즈 시트</button>
+    <button class="btn btn-gray" onclick="exportCSV()">📥 CSV 다운로드</button>
+    <button class="btn btn-gray" onclick="resetFilters()">↺ 초기화</button>
+  </div>
+
+  <!-- Result count -->
+  <div class="result-count" id="resultCount"></div>
+
+  <!-- Desktop Table -->
+  <div class="table-wrap" id="tableWrap">
+    <div class="table-scroll">
+      <table>
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Mobile Cards -->
+  <div class="cards" id="cardsContainer"></div>
+
+  <!-- Empty state -->
+  <div class="empty" id="emptyState">
+    <div class="empty-icon">🔍</div>
+    <div class="empty-text">검색 결과가 없습니다</div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// CONFIG
+// =============================================
+const TUBELENS_ID = '17ngy8Lfb4SXdpLQ6xMWrOLAxpSRhBLlQtxJg_tEUSQU';
+const MAKELENS_ID = '1j-IKsVsO9GI2oCQyOClEEWWNQV8w8hLcjEMTc1qgVP0';
+
+const SHEET_CONFIGS = {
+  '튜브렌즈_3일무료':   { id: TUBELENS_ID, gid: 779373354,   product: '튜브렌즈',   item: '3일무료',      cols: { 발급일자:'A', 이메일:'B', 사용자정보:'C', 만료일:'D', 라이센스키:'E', 타입:'F', 연락처:'J' } },
+  '튜브렌즈_30일무료':  { id: TUBELENS_ID, gid: 292856036,   product: '튜브렌즈',   item: '15-30일 무료', cols: { 발급일자:'A', 이메일:'B', 사용자정보:'C', 만료일:'D', 라이센스키:'E', 타입:'F', 연락처:'J' } },
+  '튜브렌즈_유료':      { id: TUBELENS_ID, gid: 222165253,   product: '튜브렌즈',   item: '1년 단일권',   cols: { 발급일자:'C', 이메일:'D', 사용자정보:'E', 만료일:'I', 라이센스키:'J', 타입:'K', 연락처:'F' } },
+  '튜브렌즈_정기결제':  { id: TUBELENS_ID, gid: 637641307,   product: '튜브렌즈',   item: '월 구독',      cols: { 발급일자:'C', 이메일:'D', 사용자정보:'E', 만료일:'I', 라이센스키:'J', 타입:'K', 연락처:'F' } },
+  '메이크렌즈_3일무료': { id: MAKELENS_ID, gid: 1690337338,  product: '메이크렌즈', item: '3일무료',      cols: { 발급일자:'A', 이메일:'B', 사용자정보:'C', 만료일:'D', 라이센스키:'E', 타입:'F', 연락처:'J' } },
+  '메이크렌즈_정기결제':{ id: MAKELENS_ID, gid: 268005886,   product: '메이크렌즈', item: '월 구독',      cols: { 발급일자:'C', 이메일:'D', 사용자정보:'E', 만료일:'I', 라이센스키:'J', 타입:'K', 연락처:'F' } },
+};
+
+// 중복 체크 그룹 (Python 앱과 동일)
+const DUP_GROUPS = {
+  '튜브렌즈|3일무료':      '튜브렌즈_무료',
+  '튜브렌즈|15-30일 무료': '튜브렌즈_무료',
+  '메이크렌즈|3일무료':    '메이크렌즈_무료',
+};
+
+// =============================================
+// STATE
+// =============================================
+let allData = [];
+let sortCol = 'issue_date';
+let sortDir = 'desc';
+let dupEmails = {};
+let dupContacts = {};
+let dataLoaded = false;
+
+// =============================================
+// UTILS
+// =============================================
+function colIdx(letter) {
+  let r = 0;
+  for (const c of letter.toUpperCase()) r = r * 26 + (c.charCodeAt(0) - 64);
+  return r - 1;
+}
+
+function safeGet(row, letter) {
+  const i = colIdx(letter);
+  return (i < row.length ? row[i] : '').trim();
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let i = 0;
+  const n = text.length;
+  while (i < n) {
+    const row = [];
+    while (i < n && text[i] !== '\n') {
+      if (text[i] === '"') {
+        i++;
+        let cell = '';
+        while (i < n) {
+          if (text[i] === '"' && text[i + 1] === '"') { cell += '"'; i += 2; }
+          else if (text[i] === '"') { i++; break; }
+          else cell += text[i++];
+        }
+        row.push(cell.trim());
+        if (text[i] === ',') i++;
+      } else {
+        let cell = '';
+        while (i < n && text[i] !== ',' && text[i] !== '\n') cell += text[i++];
+        row.push(cell.trim());
+        if (text[i] === ',') i++;
+      }
+    }
+    if (text[i] === '\n') i++;
+    if (row.some(c => c !== '')) rows.push(row);
+  }
+  return rows;
+}
+
+function formatKey(key) {
+  if (!key) return '';
+  const clean = key.replace(/-/g, '');
+  if (clean.length >= 20) return clean.match(/.{1,5}/g).join('-');
+  return key;
+}
+
+function calcRemaining(dateStr) {
+  if (!dateStr) return null;
+  const d = dateStr.trim().slice(0, 10).replace(/[./]/g, '-');
+  const expiry = new Date(d);
+  if (isNaN(expiry.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  expiry.setHours(0, 0, 0, 0);
+  return Math.round((expiry - today) / 86400000);
+}
+
+function fmtExpiry(dateStr) {
+  if (!dateStr) return '';
+  const d = dateStr.trim().slice(0, 10);
+  const rem = calcRemaining(dateStr);
+  if (rem === null) return d;
+  if (rem > 0) return `${d} (${rem}일 남음)`;
+  return `${d} (만료됨)`;
+}
+
+function esc(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// =============================================
+// DATA LOADING
+// =============================================
+async function fetchSheet(label, config) {
+  const url = `https://docs.google.com/spreadsheets/d/${config.id}/export?format=csv&gid=${config.gid}`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const text = await resp.text();
+  const rows = parseCSV(text);
+  const data = [];
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const userInfo = safeGet(row, config.cols.사용자정보);
+    const licKey   = safeGet(row, config.cols.라이센스키);
+    if (!userInfo && !licKey) continue;
+    const rawType = safeGet(row, config.cols.타입);
+    data.push({
+      source:      label,
+      product:     config.product,
+      item:        config.item,
+      issue_date:  safeGet(row, config.cols.발급일자),
+      email:       safeGet(row, config.cols.이메일),
+      user_info:   userInfo,
+      expiry_date: safeGet(row, config.cols.만료일),
+      license_key: formatKey(licKey),
+      type:        rawType || (label.includes('무료') ? '무료' : '유료'),
+      contact:     safeGet(row, config.cols.연락처),
+    });
+  }
+  return data;
+}
+
+async function loadAll() {
+  const overlay = document.getElementById('overlay');
+  const overlayMsg = document.getElementById('overlayMsg');
+  overlay.classList.add('on');
+  dataLoaded = false;
+
+  const results = [];
+  const errors = [];
+
+  for (const [label, config] of Object.entries(SHEET_CONFIGS)) {
+    overlayMsg.textContent = `'${label}' 로딩 중...`;
+    try {
+      const rows = await fetchSheet(label, config);
+      results.push(...rows);
+    } catch (e) {
+      errors.push(`${label}: ${e.message}`);
+    }
+  }
+
+  overlay.classList.remove('on');
+  dataLoaded = true;
+
+  if (errors.length > 0 && results.length === 0) {
+    document.getElementById('stats').innerHTML =
+      `<div class="stats-error">⚠️ 데이터 로딩 실패<br>
+       Google Sheet 공유 설정을 확인하세요: <b>공유 → 링크가 있는 모든 사용자 → 뷰어</b><br>
+       <small style="color:#999">${errors.join(' / ')}</small></div>`;
+    return;
+  }
+
+  allData = results;
+  computeDuplicates();
+  updateStats();
+  render();
+
+  if (errors.length > 0) showToast(`⚠️ ${errors.length}개 시트 로딩 실패`);
+}
+
+// =============================================
+// DUPLICATE DETECTION
+// =============================================
+function computeDuplicates() {
+  const emailCount = {};
+  const contactCount = {};
+  for (const d of allData) {
+    const group = DUP_GROUPS[`${d.product}|${d.item}`];
+    if (!group) continue;
+    if (!emailCount[group]) { emailCount[group] = {}; contactCount[group] = {}; }
+    if (d.email)   emailCount[group][d.email.toLowerCase()] = (emailCount[group][d.email.toLowerCase()] || 0) + 1;
+    if (d.contact) contactCount[group][d.contact] = (contactCount[group][d.contact] || 0) + 1;
+  }
+  dupEmails = {}; dupContacts = {};
+  for (const g of Object.keys(emailCount)) {
+    dupEmails[g]   = new Set(Object.entries(emailCount[g]).filter(([, v]) => v > 1).map(([k]) => k));
+    dupContacts[g] = new Set(Object.entries(contactCount[g]).filter(([, v]) => v > 1).map(([k]) => k));
+  }
+}
+
+function isDupEmail(d) {
+  const g = DUP_GROUPS[`${d.product}|${d.item}`];
+  return g && d.email && dupEmails[g]?.has(d.email.toLowerCase());
+}
+function isDupContact(d) {
+  const g = DUP_GROUPS[`${d.product}|${d.item}`];
+  return g && d.contact && dupContacts[g]?.has(d.contact);
+}
+
+// =============================================
+// STATS
+// =============================================
+function updateStats() {
+  const total = allData.length;
+  const freeCount = allData.filter(d => (d.type || '').includes('무료')).length;
+  const paidCount = total - freeCount;
+
+  const sheetCounts = {};
+  for (const d of allData) sheetCounts[d.source] = (sheetCounts[d.source] || 0) + 1;
+
+  const products = {};
+  for (const [src, cnt] of Object.entries(sheetCounts)) {
+    const [prod, sub] = src.split('_');
+    if (!products[prod]) products[prod] = [];
+    products[prod].push(`${sub}:${cnt}`);
+  }
+  const detail = Object.entries(products).map(([p, items]) => `${p}(${items.join(', ')})`).join(' &nbsp;|&nbsp; ');
+
+  document.getElementById('stats').innerHTML = `
+    <div class="stats-main">총 ${total.toLocaleString()}건 &nbsp;|&nbsp; 무료: ${freeCount} &nbsp;/&nbsp; 유료: ${paidCount}</div>
+    <div class="stats-detail">${detail}</div>`;
+}
+
+// =============================================
+// SORT
+// =============================================
+const COL_DEFS = [
+  { key: 'product',          label: '상품' },
+  { key: 'item',             label: '항목' },
+  { key: 'issue_date',       label: '발급일자' },
+  { key: 'email',            label: '이메일' },
+  { key: 'user_info',        label: '사용자 정보' },
+  { key: 'expiry_remaining', label: '만료일' },
+  { key: 'license_key',      label: '라이센스키' },
+  { key: 'type',             label: '타입' },
+  { key: 'contact',          label: '연락처' },
+];
+
+function sort(col) {
+  if (sortCol === col) sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+  else { sortCol = col; sortDir = (col === 'user_info') ? 'asc' : 'desc'; }
+  render();
+}
+
+function sortData(data) {
+  return [...data].sort((a, b) => {
+    if (sortCol === 'issue_date') {
+      const da = new Date((a.issue_date || '').slice(0, 10).replace(/[./]/g, '-') || '1900-01-01');
+      const db = new Date((b.issue_date || '').slice(0, 10).replace(/[./]/g, '-') || '1900-01-01');
+      return sortDir === 'desc' ? db - da : da - db;
+    }
+    if (sortCol === 'expiry_remaining') {
+      const ra = calcRemaining(a.expiry_date) ?? -9999;
+      const rb = calcRemaining(b.expiry_date) ?? -9999;
+      return sortDir === 'desc' ? rb - ra : ra - rb;
+    }
+    const va = (a[sortCol] || '').toLowerCase();
+    const vb = (b[sortCol] || '').toLowerCase();
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
+
+// =============================================
+// FILTER
+// =============================================
+function getFiltered() {
+  const sheetFilter = document.getElementById('sheetFilter').value;
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+  return allData.filter(d => {
+    if (sheetFilter && d.source !== sheetFilter) return false;
+    if (search) {
+      const hay = [d.email, d.user_info, d.license_key, d.contact].join(' ').toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+}
+
+// =============================================
+// RENDER
+// =============================================
+function render() {
+  if (!dataLoaded) return;
+  const filtered = sortData(getFiltered());
+  const n = filtered.length;
+  const total = allData.length;
+
+  document.getElementById('resultCount').textContent =
+    n === total ? `총 ${n.toLocaleString()}건` : `${n.toLocaleString()}건 표시 중 (전체 ${total.toLocaleString()}건)`;
+
+  const empty = n === 0 && total > 0;
+  document.getElementById('emptyState').style.display = empty ? 'block' : 'none';
+
+  if (empty) {
+    document.getElementById('tableBody').innerHTML = '';
+    document.getElementById('cardsContainer').innerHTML = '';
+    return;
+  }
+
+  renderTable(filtered);
+  renderCards(filtered);
+}
+
+function renderTable(data) {
+  // Header
+  let head = '<tr><th class="th-n">N</th>';
+  for (const c of COL_DEFS) {
+    const cls = sortCol === c.key ? `sort-${sortDir}` : '';
+    head += `<th class="${cls}" onclick="sort('${c.key}')">${c.label}</th>`;
+  }
+  head += '</tr>';
+  document.getElementById('tableHead').innerHTML = head;
+
+  // Body
+  let body = '';
+  data.forEach((d, idx) => {
+    const rem = calcRemaining(d.expiry_date);
+    const isExp     = rem !== null && rem <= 0;
+    const isDEmail   = isDupEmail(d);
+    const isDContact = isDupContact(d);
+    const prodChip  = d.product === '튜브렌즈' ? 'chip-tube' : 'chip-make';
+    const typeChip  = (d.type || '').includes('무료') ? 'chip-free' : 'chip-paid';
+    const keyId     = `key-${idx}`;
+
+    body += `<tr>
+      <td class="td-n">${idx + 1}</td>
+      <td><span class="chip ${prodChip}">${esc(d.product)}</span></td>
+      <td>${esc(d.item)}</td>
+      <td>${esc(d.issue_date)}</td>
+      <td class="${isDEmail ? 'cell-dup' : ''}">${esc(d.email)}</td>
+      <td>${esc(d.user_info)}</td>
+      <td class="${isExp ? 'cell-expired' : ''}">${esc(fmtExpiry(d.expiry_date))}</td>
+      <td><span id="${keyId}" class="key-cell" onclick="copyKey('${keyId}','${esc(d.license_key)}')" title="클릭하여 복사">${esc(d.license_key)}</span></td>
+      <td><span class="chip ${typeChip}">${esc(d.type)}</span></td>
+      <td class="${isDContact ? 'cell-dup' : ''}">${esc(d.contact)}</td>
+    </tr>`;
+  });
+  document.getElementById('tableBody').innerHTML = body;
+}
+
+function renderCards(data) {
+  let html = '';
+  data.forEach((d, idx) => {
+    const rem        = calcRemaining(d.expiry_date);
+    const isExp      = rem !== null && rem <= 0;
+    const isDEmail   = isDupEmail(d);
+    const isDContact = isDupContact(d);
+    const borderCls  = d.product === '튜브렌즈' ? 'tube' : 'make';
+    const prodChip   = d.product === '튜브렌즈' ? 'chip-tube' : 'chip-make';
+    const typeChip   = (d.type || '').includes('무료') ? 'chip-free' : 'chip-paid';
+    const cardId     = `card-key-${idx}`;
+
+    html += `
+    <div class="card ${borderCls}">
+      <div class="card-top">
+        <div>
+          <div class="card-meta">#${idx + 1} &nbsp;·&nbsp; ${esc(d.item)}</div>
+          <div class="card-user">${esc(d.user_info) || '<span style="color:#bbb">-</span>'}</div>
+        </div>
+        <div class="card-badges">
+          <span class="chip ${prodChip}">${esc(d.product)}</span>
+          <span class="chip ${typeChip}">${esc(d.type)}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-field card-full">
+          <div class="card-label">이메일</div>
+          <div class="card-val${isDEmail ? ' dup-val' : ''}">${esc(d.email) || '<span style="color:#bbb">-</span>'}</div>
+        </div>
+        <div class="card-field">
+          <div class="card-label">발급일자</div>
+          <div class="card-val">${esc(d.issue_date.slice(0, 10))}</div>
+        </div>
+        <div class="card-field">
+          <div class="card-label">만료일</div>
+          <div class="card-val${isExp ? ' expired-val' : ''}">${esc(fmtExpiry(d.expiry_date))}</div>
+        </div>
+        <div class="card-field card-full">
+          <div class="card-label">연락처</div>
+          <div class="card-val${isDContact ? ' dup-val' : ''}">${esc(d.contact) || '<span style="color:#bbb">-</span>'}</div>
+        </div>
+      </div>
+      <div class="card-key-row">
+        <div id="${cardId}" class="card-key-box" onclick="copyKeyCard('${cardId}','${esc(d.license_key)}')">
+          <span class="card-key-text">${esc(d.license_key) || '-'}</span>
+          <span class="card-key-hint">📋 탭하여 복사</span>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('cardsContainer').innerHTML = html;
+}
+
+// =============================================
+// COPY
+// =============================================
+function doCopy(text, onSuccess) {
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(onSuccess).catch(() => fallbackCopy(text, onSuccess));
+  } else {
+    fallbackCopy(text, onSuccess);
+  }
+}
+
+function fallbackCopy(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); cb(); } catch (e) {}
+  document.body.removeChild(ta);
+}
+
+function copyKey(elId, key) {
+  doCopy(key, () => {
+    const el = document.getElementById(elId);
+    if (el) {
+      el.classList.add('copied');
+      setTimeout(() => el.classList.remove('copied'), 1500);
+    }
+    showToast('복사됨: ' + key);
+  });
+}
+
+function copyKeyCard(elId, key) {
+  doCopy(key, () => {
+    const el = document.getElementById(elId);
+    if (el) {
+      el.classList.add('copied');
+      const hint = el.querySelector('.card-key-hint');
+      if (hint) { hint.textContent = '✅ 복사됨!'; }
+      setTimeout(() => {
+        el.classList.remove('copied');
+        if (hint) hint.textContent = '📋 탭하여 복사';
+      }, 1800);
+    }
+    showToast('복사됨: ' + key);
+  });
+}
+
+// =============================================
+// ACTIONS
+// =============================================
+function openSheet(which) {
+  const id = which === 'tube' ? TUBELENS_ID : MAKELENS_ID;
+  window.open(`https://docs.google.com/spreadsheets/d/${id}`, '_blank');
+}
+
+function resetFilters() {
+  document.getElementById('sheetFilter').value = '';
+  document.getElementById('searchInput').value = '';
+  sortCol = 'issue_date';
+  sortDir = 'desc';
+  render();
+}
+
+function exportCSV() {
+  const filtered = sortData(getFiltered());
+  if (!filtered.length) { showToast('다운로드할 데이터가 없습니다'); return; }
+
+  const headers = ['상품', '항목', '발급일자', '이메일', '사용자 정보', '만료일', '라이센스키', '타입', '연락처'];
+  const rows = [headers, ...filtered.map(d => [
+    d.product, d.item, d.issue_date, d.email,
+    d.user_info, d.expiry_date, d.license_key, d.type, d.contact
+  ])];
+  const csv = rows.map(r => r.map(v => `"${(v || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `license_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`${filtered.length}건 다운로드`);
+}
+
+// =============================================
+// TOAST
+// =============================================
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// =============================================
+// INIT
+// =============================================
+loadAll();
+</script>
+</body>
+</html>
