@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결제가 완료되었습니다</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',sans-serif;
+    background:#EE5B18;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;padding:24px;text-align:center;
+  }
+  .box{max-width:360px}
+  h1{font-size:24px;line-height:1.4;letter-spacing:-0.6px}
+  p{font-size:14px;line-height:1.9;color:#FFD9C4;margin-top:14px}
+  .btn{
+    display:inline-block;margin-top:22px;padding:15px 26px;
+    background:#1A1712;color:#fff;text-decoration:none;
+    font-size:15px;font-weight:bold;
+  }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>결제가 완료되었습니다</h1>
+    <p>
+      이 창은 잠시 후 자동으로 닫힙니다.<br>
+      앞 화면에서 이어서 안내해 드립니다.
+    </p>
+    <a class="btn" id="closeBtn" href="#">창 닫기</a>
+  </div>
+
+<script>
+  // 결제 창을 띄운 원래 페이지에 알려줍니다
+  function notifyParent() {
+    try {
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({ type: 'shoplens-year-paid' }, '*');
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  function closeSelf() {
+    try { window.close(); } catch (e) {}
+  }
+
+  var told = notifyParent();
+
+  // 알린 뒤 창을 닫습니다
+  setTimeout(function () {
+    notifyParent();
+    closeSelf();
+  }, 800);
+
+  document.getElementById('closeBtn').addEventListener('click', function (e) {
+    e.preventDefault();
+    notifyParent();
+    closeSelf();
+  });
+
+  // 창이 안 닫히는 브라우저를 위해, 5초 뒤에는 인증키 찾기로 보냅니다
+  setTimeout(function () {
+    if (!window.closed) {
+      location.href = 'https://www.tubelens.kr/license';
+    }
+  }, 5000);
+</script>
+</body>
+</html>
