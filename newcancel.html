@@ -195,6 +195,17 @@
             line-height: 1.7;
             color: #856404;
         }
+
+        /* 화면에서 눌러야 하는 곳 강조 (멤버십 관리 / 구독 해지) */
+        .guide .hl {
+            display: inline-block;
+            background: #d63031;
+            color: #fff;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 5px;
+            margin: 0 2px;
+        }
     </style>
 </head>
 <body>
@@ -228,9 +239,14 @@
         <div class="subscription-list" id="subscriptionList">
             <h2>📋 구독 목록</h2>
             <div class="guide" id="guideBox">
-                해지 버튼을 누르면 결제하신 곳(래피드)의 결제 내역 화면으로 이동합니다.<br>
-                그 화면에서 <b>구독 해지</b>를 눌러 확정해 주세요.<br>
-                본인 확인을 위해 결제하실 때 사용한 휴대폰 번호로 로그인이 필요할 수 있습니다.
+                <div style="font-size:16px; font-weight:700; margin-bottom:8px;">해지 방법 (꼭 읽어주세요)</div>
+                1. 아래 <b>래피드에서 구독 해지하기</b> 버튼을 누르면<br>
+                &nbsp;&nbsp;&nbsp;결제하신 곳(래피드)의 결제 상세 화면으로 이동합니다.<br><br>
+                2. 그 화면 <b>오른쪽 위</b>의 <span class="hl">멤버십 관리</span>를 <b>반드시 눌러주세요.</b><br>
+                &nbsp;&nbsp;&nbsp;<b>여기를 누르지 않으면 해지 버튼이 보이지 않습니다.</b><br><br>
+                3. 누르면 아래로 펼쳐집니다. 거기 있는 <span class="hl">구독 해지</span>를 누르면 <b>해지 완료입니다.</b><br>
+                <div style="margin-top:12px; color:#a06800;">※ 본인 확인을 위해 결제하실 때 사용한 휴대폰 번호로 로그인이 필요할 수 있습니다.<br>
+                ※ 해지하셔도 다음 결제일 전날까지는 그대로 사용하실 수 있습니다.</div>
             </div>
             <div id="subscriptionItems"></div>
             <button class="btn" onclick="resetForm()" style="background: #6c757d; margin-top: 10px;">← 다시 조회하기</button>
