@@ -243,6 +243,10 @@
         // 결제 내역 화면 주소 (뒤에 주문번호가 붙음)
         const PAY_DETAIL_URL = 'https://www.latpeed.com/memberships/payments?merchant_uid=';
 
+        // 조회할 때 손님이 넣은 이름·연락처 (목록에 그대로 다시 보여줌)
+        let lastName = '';
+        let lastPhone = '';
+
         // 전화번호 자동 포맷팅
         document.getElementById('phone').addEventListener('input', function(e) {
             let value = e.target.value.replace(/[^0-9]/g, '');
@@ -278,6 +282,8 @@
             hideMessage();
 
             try {
+                lastName = name;
+                lastPhone = phoneInput.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
                 const body = new URLSearchParams({
                     act: 'subs',
                     name: name,
@@ -321,6 +327,16 @@
                 title.textContent = sub.product || '구독 상품';
                 info.appendChild(title);
 
+                const nameP = document.createElement('p');
+                nameP.innerHTML = '<strong>이름:</strong> ';
+                nameP.appendChild(document.createTextNode(lastName));
+                info.appendChild(nameP);
+
+                const phoneP = document.createElement('p');
+                phoneP.innerHTML = '<strong>연락처:</strong> ';
+                phoneP.appendChild(document.createTextNode(lastPhone));
+                info.appendChild(phoneP);
+
                 const priceP = document.createElement('p');
                 priceP.innerHTML = '<strong>금액:</strong> ';
                 priceP.appendChild(document.createTextNode('월 ' + Number(sub.amount || 0).toLocaleString() + '원'));
@@ -358,12 +374,31 @@
             window.location.href = PAY_DETAIL_URL + encodeURIComponent(orderId);
         }
 
-        // 날짜 보기 좋게 (2026-08-20 10:00:00 → 2026. 08. 20. 10:00)
+        // 날짜 보기 좋게 → 2026.08.31(월) 오전 2시 17분
+        // 다른 모양(요일이 붙은 긴 글자 등)이 와도 알아서 정리한다
         function formatDate(text) {
             const s = String(text || '').trim();
-            const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
-            if (!m) return s;
-            return m[1] + '. ' + m[2] + '. ' + m[3] + '. ' + m[4] + ':' + m[5];
+            if (!s) return '';
+            const p = (n) => String(n).padStart(2, '0');
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+
+            let y, mo, da, hh = 0, mi = 0, wd;
+            const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+            if (m) {
+                y = +m[1]; mo = +m[2]; da = +m[3];
+                hh = m[4] ? +m[4] : 0; mi = m[5] ? +m[5] : 0;
+                wd = days[new Date(y, mo - 1, da).getDay()];
+            } else {
+                const d = new Date(s);
+                if (isNaN(d.getTime())) return s;
+                y = d.getFullYear(); mo = d.getMonth() + 1; da = d.getDate();
+                hh = d.getHours(); mi = d.getMinutes();
+                wd = days[d.getDay()];
+            }
+
+            const ampm = hh < 12 ? '오전' : '오후';
+            let h12 = hh % 12; if (h12 === 0) h12 = 12;
+            return y + '.' + p(mo) + '.' + p(da) + '(' + wd + ') ' + ampm + ' ' + h12 + '시 ' + mi + '분';
         }
 
         // 메시지 표시
