@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>튜브렌즈 구독 해지</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+
+        .subscription-list {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .subscription-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .subscription-info {
+            margin-bottom: 15px;
+        }
+
+        .subscription-info h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subscription-info p {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .guide {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 구독 해지</h1>
+            <p>구독 정보를 확인하고 해지할 수 있습니다</p>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div id="loginForm">
+            <div class="form-group">
+                <label for="name">이름</label>
+                <input type="text" id="name" placeholder="홍길동" maxlength="30">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">휴대폰 번호</label>
+                <input type="tel" id="phone" placeholder="010-0000-0000" maxlength="13">
+            </div>
+
+            <button class="btn" onclick="checkSubscriptions()">구독 정보 조회</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>구독 정보를 조회하고 있습니다...</p>
+        </div>
+
+        <div class="subscription-list" id="subscriptionList">
+            <h2>📋 구독 목록</h2>
+            <div class="guide" id="guideBox">
+                해지 버튼을 누르면 결제하신 곳(래피드)의 결제 내역 화면으로 이동합니다.<br>
+                그 화면에서 <b>구독 해지</b>를 눌러 확정해 주세요.<br>
+                본인 확인을 위해 결제하실 때 사용한 휴대폰 번호로 로그인이 필요할 수 있습니다.
+            </div>
+            <div id="subscriptionItems"></div>
+            <button class="btn" onclick="resetForm()" style="background: #6c757d; margin-top: 10px;">← 다시 조회하기</button>
+        </div>
+    </div>
+
+    <script>
+        // 우리 수신부 주소 (구독 조회용)
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxdVza1vJVhYYZB7O9LmZPXzaZqDHbOjVA_IC6-1S_bzABltGYZ5GZNrimeBWxla728RQ/exec';
+        // 결제 내역 화면 주소 (뒤에 주문번호가 붙음)
+        const PAY_DETAIL_URL = 'https://www.latpeed.com/memberships/payments?merchant_uid=';
+
+        // 전화번호 자동 포맷팅
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            if (value.length <= 11) {
+                if (value.length > 6) {
+                    value = value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+                } else if (value.length > 3) {
+                    value = value.replace(/(\d{3})(\d{4})/, '$1-$2');
+                }
+            }
+            e.target.value = value;
+        });
+
+        // 구독 정보 조회
+        async function checkSubscriptions() {
+            const name = document.getElementById('name').value.trim();
+            const phoneInput = document.getElementById('phone').value.replace(/[^0-9]/g, '');
+
+            // 입력 검증 (띄어쓰기를 뺀 글자 수로 확인 - 이름 비교도 띄어쓰기를 무시함)
+            if (!name || name.replace(/\s/g, '').length < 2) {
+                showMessage('이름을 올바르게 입력해주세요.', 'error');
+                return;
+            }
+
+            if (!phoneInput || phoneInput.length !== 11 || !phoneInput.startsWith('010')) {
+                showMessage('올바른 휴대폰 번호를 입력해주세요.', 'error');
+                return;
+            }
+
+            // 로딩 표시
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+            hideMessage();
+
+            try {
+                const body = new URLSearchParams({
+                    act: 'subs',
+                    name: name,
+                    phone: phoneInput
+                });
+                const response = await fetch(API_URL, { method: 'POST', body: body });
+                const data = JSON.parse(await response.text());
+
+                if (data && data.ok && data.subs && data.subs.length > 0) {
+                    displaySubscriptions(data.subs);
+                } else if (data && data.ok) {
+                    showMessage('입력하신 정보와 일치하는 구독을 찾을 수 없습니다. 구독하실 때 적으신 이름과 휴대폰 번호가 맞는지 확인해주세요.', 'error');
+                    resetForm();
+                } else {
+                    showMessage((data && data.err) ? data.err : '구독 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.', 'error');
+                    resetForm();
+                }
+
+            } catch (error) {
+                console.error('조회 오류:', error);
+                showMessage('구독 정보 조회 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+                resetForm();
+            }
+
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // 구독 목록 표시
+        function displaySubscriptions(subscriptions) {
+            const container = document.getElementById('subscriptionItems');
+            container.innerHTML = '';
+
+            subscriptions.forEach(function (sub, index) {
+                const item = document.createElement('div');
+                item.className = 'subscription-item';
+
+                const info = document.createElement('div');
+                info.className = 'subscription-info';
+
+                const title = document.createElement('h3');
+                title.textContent = sub.product || '구독 상품';
+                info.appendChild(title);
+
+                const priceP = document.createElement('p');
+                priceP.innerHTML = '<strong>금액:</strong> ';
+                priceP.appendChild(document.createTextNode('월 ' + Number(sub.amount || 0).toLocaleString() + '원'));
+                info.appendChild(priceP);
+
+                const statusP = document.createElement('p');
+                statusP.innerHTML = '<strong>상태:</strong> <span class="status active">구독중</span>';
+                info.appendChild(statusP);
+
+                const dateP = document.createElement('p');
+                dateP.innerHTML = '<strong>최초 결제일:</strong> ';
+                dateP.appendChild(document.createTextNode(formatDate(sub.paidAt)));
+                info.appendChild(dateP);
+
+                item.appendChild(info);
+
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-danger';
+                btn.textContent = '🚫 래피드에서 구독 해지하기';
+                btn.onclick = function () { goCancel(sub.oid); };
+                item.appendChild(btn);
+
+                container.appendChild(item);
+            });
+
+            document.getElementById('subscriptionList').style.display = 'block';
+        }
+
+        // 결제 내역 화면으로 이동 (해지는 그 화면에서 손님이 확정)
+        function goCancel(orderId) {
+            if (!orderId) {
+                showMessage('구독 정보를 찾지 못했습니다. 고객센터로 문의해주세요.', 'error');
+                return;
+            }
+            window.location.href = PAY_DETAIL_URL + encodeURIComponent(orderId);
+        }
+
+        // 날짜 보기 좋게 (2026-08-20 10:00:00 → 2026. 08. 20. 10:00)
+        function formatDate(text) {
+            const s = String(text || '').trim();
+            const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+            if (!m) return s;
+            return m[1] + '. ' + m[2] + '. ' + m[3] + '. ' + m[4] + ':' + m[5];
+        }
+
+        // 메시지 표시
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+        }
+
+        // 메시지 숨기기
+        function hideMessage() {
+            document.getElementById('message').style.display = 'none';
+        }
+
+        // 폼 리셋
+        function resetForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('subscriptionList').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // 엔터키 지원
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.getElementById('loginForm').style.display !== 'none') {
+                checkSubscriptions();
+            }
+        });
+    </script>
+</body>
+</html>
