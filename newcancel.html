@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -196,6 +197,29 @@
             color: #856404;
         }
 
+        /* 버튼 바로 위 해지 방법 그림 */
+        .howbox {
+            margin: 6px 0 14px 0;
+            text-align: center;
+        }
+
+        .howbox img {
+            width: 100%;
+            max-width: 420px;
+            display: block;
+            margin: 0 auto;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .howtxt {
+            margin-top: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #d63031;
+            line-height: 1.6;
+        }
+
         /* 화면에서 눌러야 하는 곳 강조 (멤버십 관리 / 구독 해지) */
         .guide .hl {
             display: inline-block;
@@ -301,8 +325,21 @@
                     name: name,
                     phone: phoneInput
                 });
-                const response = await fetch(API_URL, { method: 'POST', body: body });
-                const data = JSON.parse(await response.text());
+                // 답이 안 오면 3초, 6초 뒤에 자동으로 다시 부른다 (모두 3번 시도)
+                let data = null;
+                let lastErr = null;
+                for (let 시도 = 1; 시도 <= 3; 시도++) {
+                    try {
+                        const response = await fetch(API_URL, { method: 'POST', body: body });
+                        data = JSON.parse(await response.text());
+                        lastErr = null;
+                        break;
+                    } catch (err) {
+                        lastErr = err;
+                        if (시도 < 3) await new Promise(function (r) { setTimeout(r, 시도 * 3000); });
+                    }
+                }
+                if (lastErr) throw lastErr;
 
                 if (data && data.ok && data.subs && data.subs.length > 0) {
                     displaySubscriptions(data.subs);
@@ -364,6 +401,19 @@
                 info.appendChild(dateP);
 
                 item.appendChild(info);
+
+                // 해지 방법 안내 그림 (버튼 바로 위)
+                const howBox = document.createElement('div');
+                howBox.className = 'howbox';
+                const howImg = document.createElement('img');
+                howImg.src = 'https://raw.githubusercontent.com/seolha30/Tubelens/refs/heads/main/cc.jpg';
+                howImg.alt = '멤버십 관리를 누른 뒤 구독 해지를 누르세요';
+                howBox.appendChild(howImg);
+                const howTxt = document.createElement('div');
+                howTxt.className = 'howtxt';
+                howTxt.textContent = '위 순서대로 진행하여 해지해주세요';
+                howBox.appendChild(howTxt);
+                item.appendChild(howBox);
 
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-danger';
