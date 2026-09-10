@@ -323,18 +323,23 @@
                     name: name,
                     phone: phoneInput
                 });
-                // 답이 안 오면 3초, 6초 뒤에 자동으로 다시 부른다 (모두 3번 시도)
+                // 한 번에 10초까지만 기다리고, 안 되면 바로 다시 부른다 (모두 3번)
                 let data = null;
                 let lastErr = null;
                 for (let 시도 = 1; 시도 <= 3; 시도++) {
+                    const 시계 = new AbortController();
+                    const 종 = setTimeout(function () { 시계.abort(); }, 10000);
                     try {
-                        const response = await fetch(API_URL, { method: 'POST', body: body });
-                        data = JSON.parse(await response.text());
+                        const response = await fetch(API_URL, { method: 'POST', body: body, signal: 시계.signal });
+                        const 글 = await response.text();
+                        clearTimeout(종);
+                        data = JSON.parse(글);
                         lastErr = null;
                         break;
                     } catch (err) {
+                        clearTimeout(종);
                         lastErr = err;
-                        if (시도 < 3) await new Promise(function (r) { setTimeout(r, 시도 * 3000); });
+                        if (시도 < 3) await new Promise(function (r) { setTimeout(r, 500); });
                     }
                 }
                 if (lastErr) throw lastErr;
